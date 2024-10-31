@@ -10,8 +10,8 @@ cursor.execute('''
     CREATE TABLE IF NOT EXISTS Operacao (
         ID INTEGER PRIMARY KEY,
         tipo TEXT,
-        hora TEXT,
-        data TEXT
+        hora TIME,
+        data DATE
     )
 ''')
 
@@ -47,7 +47,7 @@ cursor.execute('''
         login TEXT,
         senha TEXT,
         email TEXT,
-        data_ingresso TEXT,
+        data_ingresso DATE,
         ID_inst INTEGER,
         FOREIGN KEY (ID_inst) REFERENCES Instituicoes(ID_inst)
     )
@@ -68,8 +68,8 @@ cursor.execute('''
     CREATE TABLE IF NOT EXISTS Comentario (
         ID INTEGER PRIMARY KEY,
         conteudo TEXT,
-        data TEXT,
-        hora TEXT,
+        data DATE,
+        hora TIME,
         ID_arq INTEGER,
         FOREIGN KEY (ID_arq) REFERENCES Arquivo(ID_arq)
     )
@@ -78,7 +78,7 @@ cursor.execute('''
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS Compartilhamento (
         ID_compart INTEGER PRIMARY KEY,
-        data TEXT,
+        data DATE,
         ID_us INTEGER,
         ID_arq INTEGER,
         FOREIGN KEY (ID_us) REFERENCES Usuario(ID_us),
@@ -89,8 +89,8 @@ cursor.execute('''
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS Historico_Versionamento (
         ID_hist INTEGER PRIMARY KEY,
-        data TEXT,
-        hora TEXT,
+        data DATE,
+        hora TIME,
         ID_us INTEGER,
         ID_arq INTEGER,
         FOREIGN KEY (ID_us) REFERENCES Usuario(ID_us),
