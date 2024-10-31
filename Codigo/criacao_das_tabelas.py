@@ -26,10 +26,16 @@ cursor.execute('''
 
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS ADM (
-        ID_adm INTEGER PRIMARY KEY
+        ID_adm INTEGER PRIMARY KEY,
+        login TEXT,
+        senha TEXT,
+        email TEXT,
+        data_ingresso TEXT,
+        ID_inst INTEGER,
+        nivel_acesso TEXT,  -- Novo atributo para o nível de acesso
+        FOREIGN KEY (ID_inst) REFERENCES Instituicoes(ID_inst)
     )
 ''')
-
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS Plano (
         ID_plano INTEGER PRIMARY KEY,
