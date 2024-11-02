@@ -93,7 +93,7 @@ FOREIGN KEY(id_usuario) REFERENCES usuario(id),
 FOREIGN KEY(id_compartilhamento) REFERENCES compartilhamento(id)
 );
 
-CREATE TABLE adm(
+CREATE TABLE adm(#analisar isso aq pra ver se e necessari o
 id INT AUTO_INCREMENT PRIMARY KEY
 );
 
