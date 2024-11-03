@@ -1,4 +1,7 @@
 from conexao import criar_conexao, fechar_conexao
+from roles import *
+from views import *
+
 
 def insere_instituicao(con, nome, endereco, causa_social): # insere uma instituição
     cursor = con.cursor()
@@ -27,6 +30,9 @@ def select_todos_usuarios(con): # irá mostrar todos os usuários já inseridos
 
     cursor.close()
     # não precisa dar commit porque não fez nenhuma alteração no banco de dados
+
+def fazerComentario(con):
+    
 
 
 def main():

@@ -2,9 +2,8 @@ import mysql.connector
 from mysql.connector import Error
 from conexao import criar_conexao
 
-def criarRole(con, nomeRole):
-    con = criar_conexao("localhost", "root", "", "webdriver")
 
+def criarRole(con, nomeRole):
     try:
         cursor = con.cursor
         cursor.execute(f"CREATE ROLE '{nomeRole}';")
