@@ -19,7 +19,7 @@ def criarRole(con, nomeRole):
 def concederPrivilegios(con, nomeRole, privilegios):
     #ATENÇÂO : tem que passar os privilegios como um array quando chamar a função
     #EX: privilegios = ['SELECT', 'INSERT', 'UPDATE']
-    
+
     con = criar_conexao("localhost", "root", "", "webdriver")
     try:
         cursor = con.cursor()
@@ -33,3 +33,17 @@ def concederPrivilegios(con, nomeRole, privilegios):
         cursor.close()
 
 
+def papelUsuario(con):
+    criarRole(con, "PapelUsuario")
+    privilegiosUsuario = ['SELECT', 'INSERT', 'UPDATE']
+    concederPrivilegios(con, "PapelUsuario", privilegiosUsuario)
+
+def papelEmpresa(con):
+    criarRole(con, "PapelEmpresa")
+    privilegiosEmpresa = ['SELECT']
+    concederPrivilegios(con, "PapelEmpresa", privilegiosEmpresa)
+
+def papelADM(con):
+    criarRole(con, "PapelADM")
+    privilegiosADM = ['SELECT', 'INSERT', 'UPDATE', 'DELETE']
+    concederPrivilegios(con, "PapelADM", privilegiosADM)
