@@ -31,7 +31,7 @@ def acessar_arquivos_adm(id_adm):
             CREATE VIEW IF NOT EXISTS  view_adm as
             SELECT * 
             FROM Arquivos
-
+            WHERE 
 
             ''')
 

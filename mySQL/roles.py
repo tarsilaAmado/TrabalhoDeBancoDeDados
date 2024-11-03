@@ -46,3 +46,16 @@ def papelADM(con):
     criarRole(con, "PapelADM")
     privilegiosADM = ['SELECT', 'INSERT', 'UPDATE', 'DELETE']
     concederPrivilegios(con, "PapelADM", privilegiosADM)
+
+def atribuir_role(con, id, role):
+    cursor = con.cursor()
+    try:
+        cursor.execute(f"GRANT '{role}' TO {id}")
+    except mysql.connector.Error as e:
+        print(f"Erro ao atribuir role : {e}")
+        
+    finally:
+        con.commit()
+        cursor.close()
+
+

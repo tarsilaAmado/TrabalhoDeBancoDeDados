@@ -64,6 +64,7 @@ def main():
 
     insere_usuario(con, "juliasvilar", "julia123", "juliasvilar@gmail.com", "2024-11-02", 1)
 
+    acessar_arquivos_usuario(con, )
     # select_todos_usuarios(con)
 
     fechar_conexao(con)
