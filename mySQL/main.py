@@ -1,6 +1,7 @@
 from conexao import criar_conexao, fechar_conexao
 from roles import *
 from views import *
+import datetime
 
 
 def insere_instituicao(con, nome, endereco, causa_social): # insere uma instituição
@@ -31,7 +32,28 @@ def select_todos_usuarios(con): # irá mostrar todos os usuários já inseridos
     cursor.close()
     # não precisa dar commit porque não fez nenhuma alteração no banco de dados
 
-def fazerComentario(con):
+def fazerComentario(con, id_arquivo, conteudo):
+    cursor = con.cursor()
+    try:
+        #obter data e hora
+        data = datetime.now().date()
+        hora = datetime.now().time()
+        #inserir no comentario
+        cursor.execute(''' 
+            INSERT INTO comentario(conteudo, id_arquivo, data_c, hora)
+            VALUES (%s, %s, %s, %s)
+        ''', (conteudo, id_arquivo, data, hora))
+
+        
+    except mysql.connector.Error as e:
+        print(f"Erro ao inserir comentario : {e}")
+    finally:
+        cursor.close()
+        #confirmar a insercao
+        con.commit()
+    
+
+
     
 
 
