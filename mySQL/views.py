@@ -12,6 +12,18 @@ def idCheck(con,id):
     finally:
         cursor.close()
 
+def idCheck_instituicao(con, id):
+    cursor = con.cursor()
+    try:
+        cursor.execute("SELECT COUNT(*) FROM instituicao WHERE id = %s", (id,))
+        return cursor.fetchone()[0] > 0
+    except mysql.connector.Error as e:
+        print(f"Error ao verificar id : {e}")
+        return False
+    finally:
+        cursor.close()
+   
+
 def acessar_arquivos_usuario(con, id):
     cursor = con.cursor()
     
@@ -36,6 +48,30 @@ def acessar_arquivos_usuario(con, id):
     except mysql.connector.Error as err:
         print(f"Erro ao acessar arquivos do usuário: {err}")
         
+    finally:
+        cursor.close()
+
+def acessar_arquivos_instituicao(con, id):
+    cursor = con.cursor()
+
+    try:
+        if idCheck_instituicao(con, id):
+
+            cursor.execute(''' 
+            CREATE VIEW IF NOT EXISTS view_instituicao AS
+            SELECT *
+            FROM Arquivo
+            JOIN Usuario ON Arquivo.id_usuario = Usuario.id
+            WHERE usuario.id_instituicao = %s
+            ''', (id,))
+
+            view_instituicao = cursor.execute('''SELECT * FROM view_instituicao ''')
+            for row in view_instituicao:
+                print(row)
+        else:
+            print(f"{id} não é uma instituição")
+    except mysql.connector.Error as e:
+        print(f"Erro ao acessar os arquivos : {e}")
     finally:
         cursor.close()
 
