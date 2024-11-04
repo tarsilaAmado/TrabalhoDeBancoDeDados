@@ -51,12 +51,35 @@ def fazerComentario(con, id_arquivo, conteudo):
         cursor.close()
         #confirmar a insercao
         con.commit()
+
+def remover_acesso(con,id_arquivo, id_compartilhamento):
+    cursor = con.cursor()
+    try:
+        cursor.execute('''
+            SELECT ID_us FROM Arquivo WHERE ID_arq = ?         
+        ''', (id_arquivo))
+        resultado = cursor.fetchone()
+
+        if resultado:
+            # O id_proprieário vai receber a primeria informação do fetchone(id_us)
+            id_proprietario = resultado[0]
+
+            cursor.execute('''
+                DELETE FROM Compartilhamento
+                WHERE ID_arq = ? AND ID_us <> ?               
+            ''', (id_arquivo, id_proprietario))
+            con.commit()
+
+            print("Acessos removidos!")
+        else:
+            print("Arquivo não encontrado.")
+
+    except mysql.connector.Error as e:
+        print(f"Erro ao remover acessos: {e}")
+    finally:
+        cursor.close()
+
     
-
-
-    
-
-
 def main():
     con = criar_conexao("localhost", "root", "", "webdriver")
     
