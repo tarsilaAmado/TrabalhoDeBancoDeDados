@@ -51,8 +51,27 @@ def fazerComentario(con, id_arquivo, conteudo):
         cursor.close()
         #confirmar a insercao
         con.commit()
-    
 
+def update_arquivo(con, id_arquivo, id_usuario, update):
+    cursor = con.cursor()
+    try:
+        # aqui vai fazer uma verificação de propriedade, tipo, se o arquivo realmente pertence ao usuário
+        cursor.execute("SELECT id_usuario FROM arquivo WHERE id = %s", (id_arquivo,))
+        resultado = cursor.fetchone()
+        if resultado is None:
+            print("Erro: arquivo inexistente.")
+            return
+        if resultado[0] != id_usuario:
+            print("você não é o proprietário deste arquivo, permissão negada!!")
+            return
+        cursor.execute("UPDATE arquivo SET conteudo = %s WHERE id = %s", (update, id_arquivo))
+        con.commit()
+        print(f"arquivo {id_arquivo} atualizado com sucesso.")
+    except mysql.connector.Error as e:
+        print(f"Erro: o arquivo não foi atualizado {e}")
+    finally:
+        cursor.close()
+#oração para essa função estar correta
 
     
 
@@ -66,6 +85,7 @@ def main():
 
     acessar_arquivos_usuario(con, )
     # select_todos_usuarios(con)
+    update_arquivo(con, id_arquivo, id_usuario, novo_conteudo)
 
     fechar_conexao(con)
 
