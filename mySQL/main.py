@@ -76,6 +76,27 @@ def remover_acesso(con,id_arquivo, id_compartilhamento):
         print(f"Erro ao remover acessos: {e}")
     finally:
         cursor.close()
+        
+def pedir_suporte(con, id_usuario, mensagem):
+    cursor = con.cursor()
+    try:
+        data_pedido = datetime.datetime.now().date() #pede data e hora atual
+        hora_pedido = datetime.datetime.now().time()
+        
+        sql = """
+            INSERT INTO suporte (id_usuario, mensagem, data_pedido, hora_pedido)
+            VALUES (%s, %s, %s, %s)
+        """ #faz um pedido de suporte enviando uma mensagem, exemplo: não consigo acessar meu arquivo
+        valores = (id_usuario, mensagem, data_pedido, hora_pedido)
+        cursor.execute(sql, valores)
+        
+
+        con.commit()
+        print("Pedido de suporte enviado com sucesso. Aguarde nosso retorno")
+    except mysql.connector.Error as e:
+        print(f"Erro: você não conseguiu enviar um pedido de suporte: {e}")
+    finally:
+        cursor.close()
     
 def main():
     con = criar_conexao("localhost", "root", "", "webdriver")
