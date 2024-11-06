@@ -97,6 +97,30 @@ def pedir_suporte(con, id_usuario, mensagem):
         print(f"Erro: você não conseguiu enviar um pedido de suporte: {e}")
     finally:
         cursor.close()
+
+    def remover_arquivo(con, id_arquivo):
+        cursor = con.cursor()
+        try:
+            sql = '''
+            SELECT ID_arq FROM Arquivo WHERE ID_arq = %s
+        '''
+            cursor.execute(sql,(id_arquivo,))
+            valor = cursor.fetchone()
+
+            if valor:
+                sql_deletar = '''
+                DELETE FROM Arquivo WHERE Id_arq = %s 
+            '''
+                cursor.execute(sql_deletar, (id_arquivo,))
+                con.commit()
+                print("Arquivo removido com sucesso!")
+            else:
+                print("Arquivo não econtrado")
+        
+        except mysql.connector.Error as e:
+            print(f"Erro ao remover o arquivo: {e}")
+        finally:
+            cursor.close()
     
 def main():
     con = criar_conexao("localhost", "root", "", "webdriver")
