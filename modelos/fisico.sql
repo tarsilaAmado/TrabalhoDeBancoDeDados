@@ -121,3 +121,10 @@ id_suporte INT,
 FOREIGN KEY(id_usuario) REFERENCES usuario(id),
 FOREIGN KEY(id_suporte) REFERENCES suporte(id)
 );
+
+CREATE TABLE IF NOT EXISTS atividades_recentes(
+id_arquivo INT PRIMARY KEY,
+ultima_versao DATE,
+acesso VARCHAR(20) NOT NULL,
+FOREIGN KEY(id_arquivo) REFERENCES arquivo(id)
+);
