@@ -14,6 +14,7 @@ def menu():
     print("7 - Acessar arquivo")
     print("8 - Criar role e atribuir privilégios")
     print("9 - Pedir suporte")
+    print("10 - Adicionar arquivo")
     print("0 - Sair")
     
 def main():
@@ -68,6 +69,13 @@ def main():
             id_arquivo = input(("Sobre que arquivo você deseja pedir o supórte (id)?" ))
             mensagem = input(("Descrição do suporte: "))
             pedir_suporte(con, id_arquivo, mensagem)
+        elif op == 10:  #adiciona arquivo
+            nome = input("Nome do arquivo: ")
+            tipo = input("Tipo do arquivo: ")
+            permissao_acesso = input("Permissão de acesso (Ex.: 'r' para leitura, 'rw' para leitura e escrita): ")
+            id_usuario = int(input("ID do usuário: "))
+            url = input("URL do arquivo: ")
+            adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url)
     
     print("Saindo do programa...")
     fechar_conexao(con)
