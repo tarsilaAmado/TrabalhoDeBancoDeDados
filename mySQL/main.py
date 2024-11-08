@@ -25,6 +25,7 @@ def main():
         menu()
         op = int(input(("Escolha: ")))
         if op == 1: # insere usuário
+            global login
             login = input(("Login: "))
             senha = input(("Senha: "))
             email = input(("Email: "))
@@ -44,7 +45,7 @@ def main():
         elif op == 4: # fazer comentário
             id_arquivo = input(("Id do arquivo: "))
             conteudo = input(("Conteúdo do comentário: "))
-            fazerComentario(con, id_arquivo, conteudo)
+            fazerComentario(con, id_arquivo, conteudo, login)
         elif op == 5: # criar plano
             nome = input(("Nome: "))
             duracao = input(("Duração (HH:MM:SS): "))
