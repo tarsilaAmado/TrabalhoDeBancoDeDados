@@ -59,8 +59,8 @@ def main():
             data = input(("Data (AAAA-MM-DD): "))
             compartilhar(con, id_arquivo, id_dono, id_compartilhado, data)
         elif op == 7: # acessar arquivo específico
-            id_arquivo = input(("Id do arquivo: "))
-            acessar_arquivo(con, id_arquivo)
+            nome_arquivo = input(("Nome do arquivo: "))
+            acessar_arquivo(con, nome_arquivo, login=login)
         elif op == 8: # criar role
             nomeRole = input(("Que role você deseja criar? "))
             criarRole(con, nomeRole)
