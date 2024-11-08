@@ -67,6 +67,8 @@ def fazerComentario(con, id_arquivo, conteudo, login):
             INSERT INTO comentario(conteudo, id_arquivo, data_c, hora)
             VALUES (%s, %s, %s, %s)
         ''', (conteudo, id_arquivo, data, hora)) 
+
+        con.commit()
         #obtem o id_comentario que é AUTO_INCREMENT
         id_comentario = cursor.lastrowid
         #obtem o id_usuario
@@ -77,12 +79,13 @@ def fazerComentario(con, id_arquivo, conteudo, login):
             INSERT INTO usuario_comentario (id_usuario, id_comentario)
             VALUES (%s, %s)
         ''', (id_usuario, id_comentario))
+        con.commit()
     except mysql.connector.Error as e:
         print(f"Erro ao inserir comentario : {e}")
     finally:
         cursor.close()
         #confirmar a insercao
-        con.commit()
+        
     
 def remover_acesso(con,id_arquivo, id_compartilhamento):
     cursor = con.cursor()
@@ -111,7 +114,7 @@ def remover_acesso(con,id_arquivo, id_compartilhamento):
     finally:
         cursor.close()
         
-def pedir_suporte(con, id_arquivo, mensagem):
+def pedir_suporte(con, id_arquivo, mensagem, login):
     cursor = con.cursor()
     try:
         data_pedido = datetime.datetime.now().date() #pede data e hora atual
@@ -123,8 +126,19 @@ def pedir_suporte(con, id_arquivo, mensagem):
         """ #faz um pedido de suporte enviando uma mensagem, exemplo: não consigo acessar meu arquivo
         valores = (id_arquivo, mensagem, data_pedido, hora_pedido)
         cursor.execute(sql, valores)
-        
 
+        con.commit()
+
+        #pega o id_suporte
+        id_suporte = cursor.lastrowid
+        #pega o id do usuario
+        cursor.execute('''SELECT id FROM usuario WHERE login = %s ''', (login,))
+        id_usuario = cursor.fetchone()
+        #inserir na tabela usuario_suporte o id_usuario e id_suporte
+
+        cursor.execute(''' INSERT INTO usuario_suporte (id_usuario, id_suporte)
+                       VALUES (%s, %s)'''
+                       ,(id_usuario, id_suporte,))
         con.commit()
         print("Pedido de suporte enviado com sucesso. Aguarde nosso retorno")
     except mysql.connector.Error as e:

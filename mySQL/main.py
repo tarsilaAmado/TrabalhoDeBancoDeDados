@@ -45,7 +45,7 @@ def main():
         elif op == 4: # fazer comentário
             id_arquivo = input(("Id do arquivo: "))
             conteudo = input(("Conteúdo do comentário: "))
-            fazerComentario(con, id_arquivo, conteudo, login)
+            fazerComentario(con, id_arquivo, conteudo, login=login)
         elif op == 5: # criar plano
             nome = input(("Nome: "))
             duracao = input(("Duração (HH:MM:SS): "))
@@ -69,7 +69,7 @@ def main():
         elif op == 9: # pedir suporte
             id_arquivo = input(("Sobre que arquivo você deseja pedir o supórte (id)?" ))
             mensagem = input(("Descrição do suporte: "))
-            pedir_suporte(con, id_arquivo, mensagem)
+            pedir_suporte(con, id_arquivo, mensagem, login=login)
         elif op == 10:  #adiciona arquivo
             nome = input("Nome do arquivo: ")
             tipo = input("Tipo do arquivo: ")
