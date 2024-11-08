@@ -232,7 +232,7 @@ def acessar_arquivo(con,nome_arquivo, login):
         #pega a permissao de acesso
         permissao_acesso = cursor.fetchone(1)
         #faz o check se o usuario tem acesso
-        acesso_arquivo = checkAcesso(con, login, id_arquivo)
+        acesso_arquivo = checkAcesso(con, id_arquivo)
         if acesso_arquivo == permissao_acesso:    
             #usando o id_arquivo faz os select necessarios
             cursor.execute(''' SELECT nome, tipo, url, id_usuario 
@@ -247,7 +247,7 @@ def acessar_arquivo(con,nome_arquivo, login):
     finally:
         cursor.close()
 
-def checkAcesso(con, login, id_arquivo):
+def checkAcesso(con, id_arquivo):
     cursor = con.cursor
     try:
         cursor.execute(''' SELECT permissao_acesso 
