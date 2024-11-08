@@ -56,17 +56,27 @@ def select_todos_usuarios(con): # irá mostrar todos os usuários já inseridos
     cursor.close()
     # não precisa dar commit porque não fez nenhuma alteração no banco de dados
 
-def fazerComentario(con, id_arquivo, conteudo):
+def fazerComentario(con, id_arquivo, conteudo, login):
     cursor = con.cursor()
     try:
         #obter data e hora
         data = datetime.now().date()
         hora = datetime.now().time()
-        #inserir no comentario
+        #inserir na tabela comentario
         cursor.execute(''' 
             INSERT INTO comentario(conteudo, id_arquivo, data_c, hora)
             VALUES (%s, %s, %s, %s)
         ''', (conteudo, id_arquivo, data, hora)) 
+        #obtem o id_comentario que é AUTO_INCREMENT
+        id_comentario = cursor.lastrowid
+        #obtem o id_usuario
+        cursor.execute('''SELECT id FROM usuario WHERE login = %s ''', (login,))
+        id_usuario = cursor.fetchone()
+        #insere id_usuario e d_comentario na tabela usuario_comentario
+        cursor.execute(''' 
+            INSERT INTO usuario_comentario (id_usuario, id_comentario)
+            VALUES (%s, %s)
+        ''', (id_usuario, id_comentario))
     except mysql.connector.Error as e:
         print(f"Erro ao inserir comentario : {e}")
     finally:
@@ -172,4 +182,6 @@ def adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url):
     
     finally:
         cursor.close()
+
+
 
