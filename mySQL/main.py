@@ -66,7 +66,7 @@ def main():
             criarRole(con, nomeRole)
             privilegios = []
             input = input(("Que privilégio deseja dar? [...,...] (escreva em caixa alta e separando por virgulas): "))
-            privilegios = [priv.strip() for priv in entrada.split(',')]
+            privilegios = [priv.strip() for priv in input.split(',')]
             concederPrivilegios(con, nomeRole, privilegios)
         elif op == 9: # pedir suporte
             id_arquivo = input(("Sobre que arquivo você deseja pedir o supórte (id)?" ))
