@@ -197,5 +197,42 @@ def adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url):
     finally:
         cursor.close()
 
+def acessar_arquivo(con,nome_arquivo, login):
+    cursor = con.cursor()
+    try:
+        #pega o id do arquivo e procura ele pelo nome do arquivo
+        cursor.execute('''SELECT id, permissao_acesso FROM arquivo WHERE nome = %s 
+                       ''',(nome_arquivo,))
+        con.commit()
+        id_arquivo = cursor.fetchone(0)
+        #pega a permissao de acesso
+        permissao_acesso = cursor.fetchone(1)
+        #faz o check se o usuario tem acesso
+        acesso_arquivo = checkAcesso(con, login, id_arquivo)
+        if acesso_arquivo == permissao_acesso:    
+            #usando o id_arquivo faz os select necessarios
+            cursor.execute(''' SELECT nome, tipo, url, id_usuario 
+                        FROM arquivo 
+                        WHERE id = %s'''(id_arquivo,))
+            con.commit()
+        else :
+            print(f"Usuario não tem acesso a arquivo {id_arquivo}")
+    except mysql.connector.Error as e:
+        print(f"Erro ao procurar arquivo : {e}")
 
+    finally:
+        cursor.close()
 
+def checkAcesso(con, login, id_arquivo):
+    cursor = con.cursor
+    try:
+        cursor.execute(''' SELECT permissao_acesso 
+                       FROM arquivo
+                       WHERE id = %s ''',(id_arquivo,))
+        permissao = cursor.fetchone()
+        return permissao
+    except mysql.connector.Error as e:
+        print(f"Erro ao procurar arquivo : {e}")
+
+    finally:
+        cursor.close()
