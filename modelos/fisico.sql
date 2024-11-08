@@ -128,3 +128,15 @@ ultima_versao DATE,
 acesso VARCHAR(20) NOT NULL,
 FOREIGN KEY(id_arquivo) REFERENCES arquivo(id)
 );
+
+-- # TRIGGERS
+
+CREATE TRIGGER insercao_drive
+BEFORE INSERT ON arquivo
+FOR EACH ROW
+BEGIN
+    IF NEW.tipo = '.exe' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Esse arquivo não pode ser salvo, pois é um arquivo executável.'
+    END IF
+END
