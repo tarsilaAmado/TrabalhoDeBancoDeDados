@@ -145,3 +145,30 @@ def remover_arquivo(con, id_arquivo):
         print(f"Erro ao remover o arquivo: {e}")
     finally:
         cursor.close()
+
+def adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url):
+    cursor = con.cursor()
+    try:
+        # Verificar se o usuário existe antes de adicionar o arquivo
+        cursor.execute("SELECT id FROM usuario WHERE id = %s", (id_usuario,))
+        usuario_existe = cursor.fetchone()
+        
+        if usuario_existe:
+            # Inserir o arquivo
+            sql = """
+                INSERT INTO arquivo (nome, tipo, permissao_acesso, id_usuario, URL)
+                VALUES (%s, %s, %s, %s, %s)
+            """
+            valores = (nome, tipo, permissao_acesso, id_usuario, url)
+            cursor.execute(sql, valores)
+            con.commit()
+            print("Arquivo adicionado com sucesso!")
+        else:
+            print("Usuário não encontrado. Verifique o ID do usuário.")
+    
+    except mysql.connector.Error as e:
+        print(f"Erro ao adicionar arquivo: {e}")
+    
+    finally:
+        cursor.close()
+
