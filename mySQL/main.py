@@ -64,7 +64,9 @@ def main():
         elif op == 8: # criar role
             nomeRole = input(("Que role você deseja criar? "))
             criarRole(con, nomeRole)
-            privilegios = input(("Que privilégio deseja dar? [...,...] "))
+            privilegios = []
+            input = input(("Que privilégio deseja dar? [...,...] (escreva em caixa alta e separando por virgulas): "))
+            privilegios = [priv.strip() for priv in entrada.split(',')]
             concederPrivilegios(con, nomeRole, privilegios)
         elif op == 9: # pedir suporte
             id_arquivo = input(("Sobre que arquivo você deseja pedir o supórte (id)?" ))
