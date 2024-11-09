@@ -246,7 +246,7 @@ def acessar_arquivo(con,nome_arquivo, login):
         cursor.close()
 
 def checkAcesso(con, id_arquivo):
-    cursor = con.cursor
+    cursor = con.cursor()
     try:
         cursor.execute(''' SELECT permissao_acesso 
                        FROM arquivo
