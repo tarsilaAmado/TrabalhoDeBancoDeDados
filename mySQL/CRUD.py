@@ -14,17 +14,15 @@ def check_login(login, senha, con):
         if informacoes[0] != None:
             #checa se a senha é compativel
             if informacoes[1] == senha:
-                print(f"Login realizado, seja bem vindo(a) {login}")
-            else:
-                print("Não foi possivel realizar login, login ou senha invalidos")                
+                return True
+            else:                
+                return False
         else:
-            print("Não foi possivel realizar login, login ou senha invalidos")
+            return False
     except mysql.connector.Error as e:
         print(f"Erro ao realizar login: {e}")
     finally:
         cursor.close()
-
-
 
 
 def insere_instituicao(con, nome, endereco, causa_social): # insere uma instituição

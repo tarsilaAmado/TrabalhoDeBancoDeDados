@@ -31,8 +31,13 @@ def main():
             senha = input(("Senha: "))
             #checa se o login existe
             #checa se a senha bate com o login
-            check_login(login, senha, con)
+            status = check_login(login_input, senha, con)
             #
+            if status == True:
+                print(f"Login realizado, seja bem vindo(a) {login}")
+                login = login_input
+            else:
+                print("Não foi possivel realizar login, login ou senha invalidos")
 
             #
         elif op == 2: # insere usuário
