@@ -140,3 +140,11 @@ BEGIN
         SET MESSAGE_TEXT = 'Esse arquivo não pode ser salvo, pois é um arquivo executável.'
     END IF
 END
+
+CREATE TRIGGER atualizar_acesso
+AFTER INSERT ON compartilhamento
+BEFORE EACH ROW
+BEGIN
+    INSERT INTO historico_versionamento (id_usuario, id_arquivo, data_v, hora)
+    VALUES (NEW.id_compartilhado, NEW_id_dono, CURDATE(), CURTIME());
+END 
