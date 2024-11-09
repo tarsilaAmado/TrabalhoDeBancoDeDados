@@ -141,6 +141,20 @@ BEGIN
     END IF
 END
 
+CREATE TRIGGER Registrar_operacao
+AFTER UPDATE ON arquivo
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT 1 FROM atividades_recentes WHERE id_arquivo = NEW.id) THEN
+        UPDATE atividades_recentes 
+        SET ultima_versao = CURDATE()
+        WHERE id_arquivo = NEW.id;
+    ELSE
+        INSERT INTO atividades_recentes (id_arquivo, ultima_versao)
+        VALUES (NEW.id, CURDATE());
+    END IF
+END
+
 CREATE TRIGGER atualizar_acesso
 AFTER INSERT ON compartilhamento
 BEFORE EACH ROW
