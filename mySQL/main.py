@@ -5,7 +5,7 @@ from CRUD import *
 
 def menu():
     print("Opções: ")
-    print("1 -Fazer Login")
+    print("1 - Fazer Login")
     print("2 - Inserir usuário")
     print("3 - Inserir instituição")
     print("4 - Criar arquivo")
@@ -23,19 +23,27 @@ def main():
     con = criar_conexao("localhost", "root", "", "webdriver")
     op = -1; 
     global login
+    login = None
+
     while op != 0:
         menu()
-        op = int(input(("Escolha: ")))
+
+        try:
+            op = int(input("Escolha: "))
+        except ValueError:
+            print("Entrada inválida, por favor, insira um número.")
+            continue
+
         if op == 1:#fazer login
             login_input = input(("Login: "))
             senha = input(("Senha: "))
             #checa se o login existe
             #checa se a senha bate com o login
-            status = check_login(login_input, senha, con)
+            status = check_login(con, login_input, senha)
             #
             if status == True:
-                print(f"Login realizado, seja bem vindo(a) {login}")
                 login = login_input
+                print(f"Login realizado, seja bem vindo(a) {login}\n")
             else:
                 print("Não foi possivel realizar login, login ou senha invalidos")
 
@@ -83,7 +91,7 @@ def main():
             nomeRole = input(("Que role você deseja criar? "))
             criarRole(con, nomeRole)
             privilegios = []
-            input = input(("Que privilégio deseja dar? [...,...] (escreva em caixa alta e separando por virgulas): "))
+            privilegios = input(("Que privilégio deseja dar? [...,...] (escreva em caixa alta e separando por virgulas): "))
             privilegios = [priv.strip() for priv in input.split(',')]
             concederPrivilegios(con, nomeRole, privilegios)
         elif op == 10: # pedir suporte
@@ -102,5 +110,5 @@ def main():
     fechar_conexao(con)
 
 
-if __name__ == "__main__":
+if _name_ == "_main_":
     main()
