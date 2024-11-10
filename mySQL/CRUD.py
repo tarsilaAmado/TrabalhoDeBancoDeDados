@@ -261,22 +261,21 @@ def checkAcesso(con, id_arquivo):
 
 def verificacaoDe100Dias(con, id_arquivo):
     cursor = con.cursor()
-    sql = "SELECT ultima_versao FROM ATIVIDADES_RECENTES WHERE id = %s" #vê a data de modificaçõ pelo id do arq
-    cursor.execute(sql, (id_arquivo,))
-    resultado = cursor.fetchone()
-    if resultado is None: #verifica se o arquivo existe
+    try:
+        sql = "SELECT ultima_versao FROM ATIVIDADES_RECENTES WHERE id = %s" #vê a data de modificaçõ pelo id do arq
+        cursor.execute(sql, (id_arquivo,))
+        resultado = cursor.fetchone()
+        if resultado is None: #verifica se o arquivo existe
+            cursor.close()
+            raise ValueError("Arquivo não encontrado")
+        data_modificacao = resultado[0]
+        if not isinstance(data_modificacao, datetime): # faz uma verificação para ver se tá em datetime
+            cursor.close()
+            raise TypeError("A data de modificação não é um datetime")
+        diferenca_dias = (datetime.now() - data_modificacao).days #calcula a diferença dos dias da data atual até a ultima mod
         cursor.close()
-        raise ValueError("Arquivo não encontrado")
-    data_modificacao = resultado[0]
-    if not isinstance(data_modificacao, datetime): # faz uma verificação para ver se tá em datetime
-        cursor.close()
-        raise TypeError("A data de modificação não é um datetime")
-    diferenca_dias = (datetime.now() - data_modificacao).days #calcula a diferença dos dias da data atual até a ultima mod
-    cursor.close()
-    return diferenca_dias > 100
+        return diferenca_dias > 100
     except mysql.connector.Error as e:
         print(f"Erro: {e}")
-finally:
-        cursor.close()
-    
-
+    finally:
+            cursor.close()
