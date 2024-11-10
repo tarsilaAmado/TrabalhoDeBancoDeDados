@@ -80,11 +80,13 @@ FOREIGN KEY(id_comentario) REFERENCES comentario(id)
 
 CREATE TABLE IF NOT EXISTS compartilhamento(
 id INT AUTO_INCREMENT PRIMARY KEY,
+id_arquivo INT,
 id_dono INT,
 id_compartilhado INT,
 data_c DATE,
 FOREIGN KEY(id_dono) REFERENCES usuario(id),
-FOREIGN KEY(id_compartilhado) REFERENCES usuario(id)
+FOREIGN KEY(id_compartilhado) REFERENCES usuario(id),
+FOREIGN KEY (id_arquivo) REFERENCES arquivo(id)
 );
 
 CREATE TABLE IF NOT EXISTS usuario_compartilhamento(
