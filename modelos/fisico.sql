@@ -131,15 +131,18 @@ FOREIGN KEY(id_arquivo) REFERENCES arquivo(id)
 
 -- # TRIGGERS
 
+DELIMITER //
+
 CREATE TRIGGER insercao_drive
 BEFORE INSERT ON arquivo
 FOR EACH ROW
 BEGIN
     IF NEW.tipo = '.exe' THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Esse arquivo não pode ser salvo, pois é um arquivo executável.'
-    END IF
-END
+        SET MESSAGE_TEXT = 'Esse arquivo não pode ser salvo, pois é um arquivo executável.';
+    END IF;
+END;
+//
 
 CREATE TRIGGER Registrar_operacao
 AFTER UPDATE ON arquivo
@@ -150,15 +153,19 @@ BEGIN
         SET ultima_versao = CURDATE()
         WHERE id_arquivo = NEW.id;
     ELSE
-        INSERT INTO atividades_recentes (id_arquivo, ultima_versao)
-        VALUES (NEW.id, CURDATE());
-    END IF
-END
+        INSERT INTO atividades_recentes (id_arquivo, ultima_versao, acesso)
+        VALUES (NEW.id, CURDATE(), 'default');
+    END IF;
+END;
+//
 
 CREATE TRIGGER atualizar_acesso
 AFTER INSERT ON compartilhamento
-BEFORE EACH ROW
+FOR EACH ROW
 BEGIN
     INSERT INTO historico_versionamento (id_usuario, id_arquivo, data_v, hora)
-    VALUES (NEW.id_compartilhado, NEW_id_usuario, CURDATE(), CURTIME());
-END 
+    VALUES (NEW.id_compartilhado, NEW.id_dono, CURDATE(), CURTIME());
+END;
+//
+
+DELIMITER ;
