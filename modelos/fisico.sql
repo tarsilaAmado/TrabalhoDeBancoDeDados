@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS arquivo(
 id INT AUTO_INCREMENT PRIMARY KEY,
 nome VARCHAR(30) NOT NULL,
 tipo VARCHAR(30) NOT NULL,
-permissao_acesso VARCHAR(5),
+permissao_acesso VARCHAR(50),
 id_usuario INT,
 URL VARCHAR(100),
 FOREIGN KEY(id_usuario) REFERENCES usuario(id)
@@ -159,12 +159,33 @@ BEGIN
 END;
 //
 
+DELIMITER //
+
 CREATE TRIGGER atualizar_acesso
 AFTER INSERT ON compartilhamento
 FOR EACH ROW
 BEGIN
+    -- Atualiza a permissão de acesso do arquivo com base no acesso compartilhado
+    DECLARE arquivo_permissao VARCHAR(50);
+
+    -- Pegando a permissão de acesso do arquivo compartilhado
+    SELECT permissao_acesso INTO arquivo_permissao
+    FROM arquivo
+    WHERE id = NEW.id_arquivo;
+
+    IF arquivo_permissao = "privado" THEN
+        UPDATE arquivo 
+        SET permissao_acesso = "privado/compartilhado"
+        WHERE id = NEW.id_arquivo;
+    ELSE
+        UPDATE arquivo 
+        SET permissao_acesso = "público/compartilhado"
+        WHERE id = NEW.id_arquivo;
+    END IF;
+
+    -- Inserir no histórico de versionamento
     INSERT INTO historico_versionamento (id_usuario, id_arquivo, data_v, hora)
-    VALUES (NEW.id_compartilhado, NEW.id_dono, CURDATE(), CURTIME());
+    VALUES (NEW.id_dono, NEW.id_arquivo, CURDATE(), CURTIME());
 END;
 //
 
