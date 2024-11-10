@@ -160,5 +160,5 @@ AFTER INSERT ON compartilhamento
 BEFORE EACH ROW
 BEGIN
     INSERT INTO historico_versionamento (id_usuario, id_arquivo, data_v, hora)
-    VALUES (NEW.id_compartilhado, NEW_id_dono, CURDATE(), CURTIME());
+    VALUES (NEW.id_compartilhado, NEW_id_usuario, CURDATE(), CURTIME());
 END 
