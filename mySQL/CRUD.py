@@ -78,11 +78,12 @@ def select_todos_usuarios(con): # irá mostrar todos os usuários já inseridos
     # não precisa dar commit porque não fez nenhuma alteração no banco de dados
 
 def fazerComentario(con, id_arquivo, conteudo, login):
-    cursor = con.cursor()
+    cursor = con.cursor(buffered=True)
     try:
         #obter data e hora
-        data = datetime.now().date()
-        hora = datetime.now().time()
+        data = datetime.datetime.now().date()
+        hora = datetime.datetime.now().time()
+
         #inserir na tabela comentario
         cursor.execute(''' 
             INSERT INTO comentario(conteudo, id_arquivo, data_c, hora)
@@ -96,11 +97,12 @@ def fazerComentario(con, id_arquivo, conteudo, login):
         cursor.execute('''SELECT id FROM usuario WHERE login = %s ''', (login,))
         id_usuario = cursor.fetchone()
         #insere id_usuario e d_comentario na tabela usuario_comentario
-        cursor.execute(''' 
-            INSERT INTO usuario_comentario (id_usuario, id_comentario)
-            VALUES (%s, %s)
-        ''', (id_usuario, id_comentario))
-        con.commit()
+        if id_usuario:
+            cursor.execute(''' 
+                INSERT INTO usuario_comentario (id_usuario, id_comentario)
+                VALUES (%s, %s)
+            ''', (id_usuario[0], id_comentario))
+            con.commit()
     except mysql.connector.Error as e:
         print(f"Erro ao inserir comentario : {e}")
     finally:
@@ -171,14 +173,14 @@ def remover_arquivo(con, id_arquivo):
     cursor = con.cursor()
     try:
         sql = '''
-        SELECT ID_arq FROM Arquivo WHERE ID_arq = %s
+        SELECT id FROM arquivo WHERE id = %s
     '''
         cursor.execute(sql,(id_arquivo,))
         valor = cursor.fetchone()
 
         if valor:
             sql_deletar = '''
-            DELETE FROM Arquivo WHERE Id_arq = %s 
+            DELETE FROM arquivo WHERE id = %s 
         '''
             cursor.execute(sql_deletar, (id_arquivo,))
             con.commit()
@@ -207,13 +209,13 @@ def adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url):
             valores = (nome, tipo, permissao_acesso, id_usuario, url)
             cursor.execute(sql, valores)
             con.commit()
-            print("Arquivo adicionado com sucesso!")
+            print("Arquivo adicionado com sucesso!\n")
             
         else:
-            print("Usuário não encontrado. Verifique o ID do usuário.")
+            print("Usuário não encontrado. Verifique o ID do usuário.\n")
         #CASO DER ERRO
     except mysql.connector.Error as e:
-        print(f"Erro ao adicionar arquivo: {e}")
+        print(f"Erro ao adicionar arquivo: {e}\n")
     
     finally:
         cursor.close()
@@ -278,3 +280,28 @@ def verificacaoDe100Dias(con, id_arquivo):
         print(f"Erro: {e}")
     finally:
             cursor.close()
+
+def compartilhar(con, id_arquivo, id_usuario_dono, id_usuario_compartilhado):
+    cursor = con.cursor()
+    try:
+        cursor.execute("SELECT id FROM arquivo WHERE id = %s AND id_usuario = %s", (id_arquivo, id_usuario_dono))
+        arquivo_existe = cursor.fetchone()
+
+        if arquivo_existe:
+            sql = """
+                INSERT INTO compartilhamento (id_arquivo, id_usuario_dono, id_usuario_compartilhado, data_compartilhamento)
+                VALUES (%s, %s, %s, %s)
+            """
+            data_compartilhamento = datetime.now().date()
+            valores = (id_arquivo, id_usuario_dono, id_usuario_compartilhado, data_compartilhamento)
+            cursor.execute(sql, valores)
+            con.commit()
+            print("Arquivo compartilhado com sucesso!")
+        else:
+            print(" Arquivo nao encontrado.")
+    
+    except mysql.connector.Error as e:
+        print(f"Erro ao compartilhar arquivo: {e}")
+    
+    finally:
+        cursor.close()
