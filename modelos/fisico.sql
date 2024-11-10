@@ -167,13 +167,8 @@ CREATE TRIGGER atualizar_acesso
 AFTER INSERT ON compartilhamento
 FOR EACH ROW
 BEGIN
-    -- Atualiza a permissão de acesso do arquivo com base no acesso compartilhado
     DECLARE arquivo_permissao VARCHAR(50);
-
-    -- Pegando a permissão de acesso do arquivo compartilhado
-    SELECT permissao_acesso INTO arquivo_permissao
-    FROM arquivo
-    WHERE id = NEW.id_arquivo;
+    SELECT permissao_acesso INTO arquivo_permissao FROM arquivo WHERE id = NEW.id_arquivo;
 
     IF arquivo_permissao = "privado" THEN
         UPDATE arquivo 
@@ -185,7 +180,6 @@ BEGIN
         WHERE id = NEW.id_arquivo;
     END IF;
 
-    -- Inserir no histórico de versionamento
     INSERT INTO historico_versionamento (id_usuario, id_arquivo, data_v, hora)
     VALUES (NEW.id_dono, NEW.id_arquivo, CURDATE(), CURTIME());
 END;
