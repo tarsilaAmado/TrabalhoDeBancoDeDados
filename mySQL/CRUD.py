@@ -3,26 +3,25 @@ from mysql.connector import Error
 from conexao import criar_conexao
 import datetime
 
-def check_login(login, senha, con):
-    cursor = con.cursor()
+def check_login(con, login, senha): 
+    cursor = con.cursor(buffered=True)  # Adiciona buffered=True (limpa o buffer do cursor)
     try:
         cursor.execute('''SELECT id, senha 
-                       FROM usuario
-                       WHERE login = %s ''', (login,))
-        informacoes = cursor.fetchone()
-        #checa se o id existe (diferente de null)
-        if informacoes[0] != None:
-            #checa se a senha é compativel
-            if informacoes[1] == senha:
-                return True
-            else:                
-                return False
+                          FROM usuario
+                          WHERE login = %s''', (login,))
+        informacoes = cursor.fetchone()  # Obtenha apenas uma linha
+
+        # Verifique se o usuário foi encontrado e se a senha corresponde
+        if informacoes is not None and informacoes[1] == senha:
+            return True
         else:
             return False
+
     except mysql.connector.Error as e:
         print(f"Erro ao realizar login: {e}")
     finally:
-        cursor.close()
+        cursor.close()  # Feche o cursor apenas no final
+
 
 
 def insere_instituicao(con, nome, endereco, causa_social): # insere uma instituição
