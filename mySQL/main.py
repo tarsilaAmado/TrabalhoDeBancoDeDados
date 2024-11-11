@@ -5,38 +5,55 @@ from CRUD import *
 
 def menu():
     print("Opções: ")
-    print("1 - Inserir usuário")
+    print("1 - Criar usuário")
     print("2 - Inserir instituição")
     print("3 - Criar arquivo")
     print("4 - Fazer comentário")
     print("5 - Criar plano")
     print("6 - Compartilhar arquivo")
     print("7 - Acessar arquivo")
-    print("8 - Criar role e atribuir privilégios")
+    print("8 - Atribuir role a um usuário")
     print("9 - Pedir suporte")
     print("10 - Remover arquivo")
     print("0 - Sair")
     
 def main():
 
-    con = criar_conexao("localhost", "root", "", "webdriver")
-    op = -1; 
-    global login
-    login = None
+    print("Entrar:\n1 - Com login\n2 - Como root")
+    resposta = input("Escolha: ")
 
-    login_input = input(("Login: "))
-    senha = input(("Senha: "))
-    #checa se o login existe
-    #checa se a senha bate com o login
-    status = check_login(con, login_input, senha)
-    #
-    if status == True:
-        login = login_input
-        print(f"Login realizado, seja bem vindo(a) {login}\n")
+    
+
+    if resposta == "1":
+        global login
+        login = None
+
+        login_input = input(("Login: "))
+        senha = input(("Senha: "))
+        
+        con = criar_conexao("localhost", login_input, senha, "webdriver")
+        if con is None:
+            print("Falha na conexão com o banco de dados.")
+            return
+        
+        # checa se o login existe
+        # checa se a senha bate com o login
+        
+        if check_login(con, login_input, senha):
+            login = login_input
+            print(f"Login realizado, seja bem vindo(a) {login}\n")
+        else:
+            print("Não foi possivel realizar login, login ou senha invalidos")
+            fechar_conexao(con)
+            return
+    elif resposta == "2":
+        print("Seja bem vindo(a) root\n")
+        con = criar_conexao("localhost", "root", "", "webdriver")
     else:
-        print("Não foi possivel realizar login, login ou senha invalidos")
+        print("Opção inválida.")
+        return
 
-
+    op = -1; 
     while op != 0:
 
         menu()
@@ -56,10 +73,6 @@ def main():
             data_ingresso = input(("Data de ingresso: "))
             id_instituicao = input(("Id da instituição: "))
             insere_usuario(con, login, senha, email, data_ingresso, id_instituicao)
-            resposta = int(input(("É administrador?\n1 - sim\n2- não\n")))
-            if resposta == 1:
-                inserir_adm(con, login)
-            print("Usuário adicionado com sucesso!\n")
         elif op == 2: # insere instituição
             nome = input(("Nome: "))
             endereco = input(("Endereço: "))
@@ -90,18 +103,16 @@ def main():
             compartilhar(con, id_arquivo, id_dono, id_compartilhado)
         elif op == 7: # acessar arquivo específico
             nome_arquivo = input(("Nome do arquivo: "))
-            acessar_arquivo(con, nome_arquivo, login=login)
-        elif op == 8: # criar role
-            nomeRole = input(("Que role você deseja criar? "))
-            criarRole(con, nomeRole)
-            privilegios = []
-            privilegios = input(("Que privilégio deseja dar? [...,...] (escreva em caixa alta e separando por virgulas): "))
-            privilegios = [priv.strip() for priv in input.split(',')]
-            concederPrivilegios(con, nomeRole, privilegios)
+            acessar_arquivo(con, nome_arquivo)
+        elif op == 8: # atribuir role a usuário
+            id = input("Id do usuário a receber a role: ")
+            print("Role a ser atribuida:\n1 - Usuário\n2 - Empresa\n3 - ADM")
+            escolha = input("Escolha: ")
+            atribuir_role(con, id, escolha)
         elif op == 9: # pedir suporte
-            id_arquivo = input(("Sobre que arquivo você deseja pedir o supórte (id)?" ))
+            id_arquivo = input(("Sobre que arquivo você deseja pedir o supórte (id)? " ))
             mensagem = input(("Descrição do suporte: "))
-            pedir_suporte(con, id_arquivo, mensagem, login=login)
+            pedir_suporte(con, id_arquivo, mensagem, login)
         elif op == 10:  # remover arquivo
             id_arquivo = input("Id do arquivo a ser deletado: ")
             remover_arquivo(con, id_arquivo)
