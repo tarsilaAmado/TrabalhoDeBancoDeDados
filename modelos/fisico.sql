@@ -161,7 +161,35 @@ BEGIN
 END;
 //
 
-DELIMITER //
+CREATE TRIGGER Registrar_operacao
+AFTER INSERT ON arquivo
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT 1 FROM atividades_recentes WHERE id_arquivo = NEW.id) THEN
+        UPDATE atividades_recentes 
+        SET ultima_versao = CURDATE()
+        WHERE id_arquivo = NEW.id;
+    ELSE
+        INSERT INTO atividades_recentes (id_arquivo, ultima_versao, acesso)
+        VALUES (NEW.id, CURDATE(), 'default');
+    END IF;
+END;
+//
+
+CREATE TRIGGER Registrar_operacao
+AFTER DELETE ON arquivo
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT 1 FROM atividades_recentes WHERE id_arquivo = OLD.id) THEN
+        UPDATE atividades_recentes 
+        SET ultima_versao = CURDATE()
+        WHERE id_arquivo = OLD.id;
+    ELSE
+        INSERT INTO atividades_recentes (id_arquivo, ultima_versao, acesso)
+        VALUES (OLD.id, CURDATE(), 'default');
+    END IF;
+END;
+//
 
 CREATE TRIGGER atualizar_acesso
 AFTER INSERT ON compartilhamento
@@ -193,7 +221,6 @@ DELIMITER ;
 CREATE ROLE 'papelADM';
 CREATE ROLE 'papelEmpresa';
 CREATE ROLE 'papelUsuario';
-GRANT SELECT, INSERT, UPDATE ON webdriver.* TO 'papelUsuario';
-GRANT SELECT ON webdriver.* TO 'papelEmpresa';
-GRANT SELECT, INSERT, UPDATE, DELETE ON webdriver.* TO 'papelADM';
-
+GRANT SELECT, INSERT, UPDATE ON webdriver.* TO 'papelUsuario'@'localhost';
+GRANT SELECT ON webdriver.* TO 'papelEmpresa'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE USER ON webdriver.* TO 'papelADM'@'localhost';
