@@ -186,3 +186,14 @@ END;
 //
 
 DELIMITER ;
+
+
+-- # ROLES
+
+CREATE ROLE 'papelADM';
+CREATE ROLE 'papelEmpresa';
+CREATE ROLE 'papelUsuario';
+GRANT SELECT, INSERT, UPDATE ON webdriver.* TO 'papelUsuario';
+GRANT SELECT ON webdriver.* TO 'papelEmpresa';
+GRANT SELECT, INSERT, UPDATE, DELETE ON webdriver.* TO 'papelADM';
+
