@@ -1,61 +1,28 @@
 import mysql.connector
 from mysql.connector import Error
-from conexao import criar_conexao
+from conexao import *
 
 
-def criarRole(con, nomeRole):
-    try:
-        cursor = con.cursor
-        cursor.execute(f"CREATE ROLE '{nomeRole}';")
-        con.commit()
-        print(f"Role {nomeRole} criado com sucesso.")
-
-    except Error as e:
-        print("Erro ao criar Role!!!")
-    finally:
-        cursor.close()
-    
-def concederPrivilegios(con, nomeRole, privilegios):
-    #ATENÇÂO : tem que passar os privilegios como um array quando chamar a função
-    #EX: privilegios = ['SELECT', 'INSERT', 'UPDATE']
-
-    con = criar_conexao("localhost", "root", "", "webdriver")
-    try:
-        cursor = con.cursor()
-        for privilege in privilegios:
-            cursor.execute(f"GRANT {privilege} ON webdriver TO '{nomeRole}';")
-        con.commit()
-        print(f"Privilegios {privilegios} concedidos ao Role {nomeRole}")
-    except Error as e:
-        print(f"Error creating role or granting privileges: {e}")
-    finally:
-        cursor.close()
-
-
-def papelUsuario(con):
-    criarRole(con, "PapelUsuario")
-    privilegiosUsuario = ['SELECT', 'INSERT', 'UPDATE']
-    concederPrivilegios(con, "PapelUsuario", privilegiosUsuario)
-
-def papelEmpresa(con):
-    criarRole(con, "PapelEmpresa")
-    privilegiosEmpresa = ['SELECT']
-    concederPrivilegios(con, "PapelEmpresa", privilegiosEmpresa)
-
-def papelADM(con):
-    criarRole(con, "PapelADM")
-    privilegiosADM = ['SELECT', 'INSERT', 'UPDATE', 'DELETE']
-    concederPrivilegios(con, "PapelADM", privilegiosADM)
-
-def atribuir_role(con, id, role):
+def atribuir_role(con, id, escolha):
     cursor = con.cursor()
+    
     try:
-        cursor.execute(f"GRANT '{role}' TO {id}")
+        if escolha == "1":
+            cursor.execute("GRANT papelUsuario TO %s", (id,))
+        elif escolha == "2":
+            cursor.execute("GRANT papelEmpresa TO %s", (id,))
+        elif escolha == "3":
+            cursor.execute("GRANT papelADM TO %s", (id,))
+        else:
+            print("Opção de role inválida.")
+            return
+        
+        con.commit()  # Commitando a alteração
+        print("Role atribuída com sucesso.\n")
+
     except mysql.connector.Error as e:
         print(f"Erro ao atribuir role : {e}")
         
     finally:
         con.commit()
         cursor.close()
-
-
