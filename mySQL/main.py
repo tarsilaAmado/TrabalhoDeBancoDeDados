@@ -12,9 +12,9 @@ def menu():
     print("5 - Criar plano")
     print("6 - Compartilhar arquivo")
     print("7 - Acessar arquivo")
-    print("8 - Atribuir role a um usuário")
-    print("9 - Pedir suporte")
-    print("10 - Remover arquivo")
+    print("8 - Pedir suporte")
+    print("9 - Remover arquivo")
+    print("10 - Checar tempo de modificação de arquivo")
     print("0 - Sair")
     
 def main():
@@ -104,22 +104,23 @@ def main():
         elif op == 7: # acessar arquivo específico
             nome_arquivo = input(("Nome do arquivo: "))
             acessar_arquivo(con, nome_arquivo)
-        elif op == 8: # atribuir role a usuário
-            id = input("Id do usuário a receber a role: ")
-            print("Role a ser atribuida:\n1 - Usuário\n2 - Empresa\n3 - ADM")
-            escolha = input("Escolha: ")
-            atribuir_role(con, id, escolha)
-        elif op == 9: # pedir suporte
+        elif op == 8: # pedir suporte
             id_arquivo = input(("Sobre que arquivo você deseja pedir o supórte (id)? " ))
             mensagem = input(("Descrição do suporte: "))
             pedir_suporte(con, id_arquivo, mensagem, login)
-        elif op == 10:  # remover arquivo
+        elif op == 9:  # remover arquivo
             id_arquivo = input("Id do arquivo a ser deletado: ")
             remover_arquivo(con, id_arquivo)
+        elif op == 10:
+            id_arquivo = input("Id do arquivo a ser checado: ")
+            if verificacaoDe100Dias(con,id_arquivo):
+                print("Arquivo modificado há mais de 100 dias.\n")
+            else:
+                print("Arquivo modificado há menos de 100 dias.\n")
     
     print("Saindo do programa...")
     fechar_conexao(con)
 
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     main()
