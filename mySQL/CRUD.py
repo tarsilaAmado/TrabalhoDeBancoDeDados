@@ -1,7 +1,8 @@
 import mysql.connector
 from mysql.connector import Error
 from conexao import criar_conexao
-import datetime
+from datetime import datetime
+from views import *
 
 def check_login(con, login, senha): 
     cursor = con.cursor(buffered=True)  # Adiciona buffered=True (limpa o buffer do cursor)
@@ -34,11 +35,27 @@ def insere_instituicao(con, nome, endereco, causa_social): # insere uma institui
 
 def insere_usuario(con, login, senha, email, data_ingresso, id_instituicao): # insere um usuário
     cursor = con.cursor()
-    sql = "INSERT INTO usuario (login, senha, email, data_ingresso, id_instituicao) values (%s, %s, %s, %s, %s)"
-    valores = (login, senha, email, data_ingresso, id_instituicao)
-    cursor.execute(sql, valores)
+    try:
+        create_user_sql = f"CREATE USER '{login}'@'localhost' IDENTIFIED BY '{senha}';"
+        cursor.execute(create_user_sql)
+        cursor = con.cursor()
+        sql = "INSERT INTO usuario (login, senha, email, data_ingresso, id_instituicao) values (%s, %s, %s, %s, %s)"
+        valores = (login, senha, email, data_ingresso, id_instituicao)
+        cursor.execute(sql, valores)
+        con.commit() # dando commit pois foi feita uma alteração no banco de dados
+        print(f"Usuário {login} criado no MySQL.")
+
+        grant_privileges_sql = f"GRANT ALL PRIVILEGES ON webdriver.* TO '{login}'@'localhost';"
+        cursor.execute(grant_privileges_sql)
+        con.commit()
+        
+        # Recarrega as permissões para que entrem em vigor
+        cursor.execute("FLUSH PRIVILEGES;")
+        con.commit()
+    except Exception as e:
+        print(f"Erro ao criar o usuário no MySQL: {e}")
+        con.rollback()  # Em caso de erro, desfaz as mudanças feitas
     cursor.close()
-    con.commit() # dando commit pois foi feita uma alteração no banco de dados
 
 def insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario): # insere um plano
     cursor = con.cursor()
@@ -81,8 +98,8 @@ def fazerComentario(con, id_arquivo, conteudo, login):
     cursor = con.cursor(buffered=True)
     try:
         #obter data e hora
-        data = datetime.datetime.now().date()
-        hora = datetime.datetime.now().time()
+        data = datetime.now().date()
+        hora = datetime.now().time()
 
         #inserir na tabela comentario
         cursor.execute(''' 
@@ -140,11 +157,11 @@ def remover_acesso(con,id_arquivo, id_compartilhamento):
 def pedir_suporte(con, id_arquivo, mensagem, login):
     cursor = con.cursor()
     try:
-        data_pedido = datetime.datetime.now().date() #pede data e hora atual
-        hora_pedido = datetime.datetime.now().time()
+        data_pedido = datetime.now().date() #pede data e hora atual
+        hora_pedido = datetime.now().time()
         
         sql = """
-            INSERT INTO suporte (id_arquivo, mensagem, data_pedido, hora_pedido)
+            INSERT INTO suporte (id_arquivo, descricao, dia, hora)
             VALUES (%s, %s, %s, %s)
         """ #faz um pedido de suporte enviando uma mensagem, exemplo: não consigo acessar meu arquivo
         valores = (id_arquivo, mensagem, data_pedido, hora_pedido)
@@ -157,13 +174,19 @@ def pedir_suporte(con, id_arquivo, mensagem, login):
         #pega o id do usuario
         cursor.execute('''SELECT id FROM usuario WHERE login = %s ''', (login,))
         id_usuario = cursor.fetchone()
-        #inserir na tabela usuario_suporte o id_usuario e id_suporte
+        #inserir na tabela usuario_suporte o id_usuario e id_supor  te
 
-        cursor.execute(''' INSERT INTO usuario_suporte (id_usuario, id_suporte)
-                       VALUES (%s, %s)'''
-                       ,(id_usuario, id_suporte,))
-        con.commit()
-        print("Pedido de suporte enviado com sucesso. Aguarde nosso retorno")
+        if id_usuario:
+            # Acessa o valor dentro da tupla para obter o id_usuario
+            id_usuario = id_usuario[0]
+            cursor.execute(''' INSERT INTO usuario_suporte (id_usuario, id_suporte)
+                        VALUES (%s, %s)'''
+                        ,(id_usuario, id_suporte,))
+            con.commit()
+            print("Pedido de suporte enviado com sucesso. Aguarde nosso retorno")
+        else:
+            print(f"Usuário {login} não encontrado.")
+            
     except mysql.connector.Error as e:
         print(f"Erro: você não conseguiu enviar um pedido de suporte: {e}")
     finally:
@@ -220,24 +243,26 @@ def adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url):
     finally:
         cursor.close()
 
-def acessar_arquivo(con,nome_arquivo, login):
+def acessar_arquivo(con,nome_arquivo):
     cursor = con.cursor()
     try:
+
+        acessar_arquivos_usuario(con,id)
+
         #pega o id do arquivo e procura ele pelo nome do arquivo
         cursor.execute('''SELECT id, permissao_acesso FROM arquivo WHERE nome = %s 
                        ''',(nome_arquivo,))
-        con.commit()
+
         id_arquivo = cursor.fetchone(0)
         #pega a permissao de acesso
         permissao_acesso = cursor.fetchone(1)
         #faz o check se o usuario tem acesso
-        acesso_arquivo = checkAcesso(con, id_arquivo)
-        if acesso_arquivo == permissao_acesso:    
+        if permissao_acesso == "público" or permissao_acesso == "público/compartilhado" or permissao_acesso == "privado/compartilhado": 
             #usando o id_arquivo faz os select necessarios
-            cursor.execute(''' SELECT nome, tipo, url, id_usuario 
+            cursor.execute(''' SELECT nome, tipo, url, id_usuario, 
                         FROM arquivo 
                         WHERE id = %s'''(id_arquivo,))
-            con.commit()
+
         else :
             print(f"Usuario não tem acesso a arquivo {id_arquivo}")
     except mysql.connector.Error as e:
@@ -246,19 +271,6 @@ def acessar_arquivo(con,nome_arquivo, login):
     finally:
         cursor.close()
 
-def checkAcesso(con, id_arquivo):
-    cursor = con.cursor()
-    try:
-        cursor.execute(''' SELECT permissao_acesso 
-                       FROM arquivo
-                       WHERE id = %s ''',(id_arquivo,))
-        permissao = cursor.fetchone()
-        return permissao
-    except mysql.connector.Error as e:
-        print(f"Erro ao procurar arquivo : {e}")
-
-    finally:
-        cursor.close()
 
 def verificacaoDe100Dias(con, id_arquivo):
     cursor = con.cursor()
@@ -289,7 +301,7 @@ def compartilhar(con, id_arquivo, id_usuario_dono, id_usuario_compartilhado):
 
         if arquivo_existe:
             sql = """
-                INSERT INTO compartilhamento (id_arquivo, id_usuario_dono, id_usuario_compartilhado, data_compartilhamento)
+                INSERT INTO compartilhamento (id_arquivo, id_dono, id_compartilhado, data_c)
                 VALUES (%s, %s, %s, %s)
             """
             data_compartilhamento = datetime.now().date()
@@ -297,6 +309,20 @@ def compartilhar(con, id_arquivo, id_usuario_dono, id_usuario_compartilhado):
             cursor.execute(sql, valores)
             con.commit()
             print("Arquivo compartilhado com sucesso!")
+
+            id_c = '''
+                SELECT id FROM compartilhamento WHERE id_arquivo = %s AND id_compartilhado = %s
+            '''
+            cursor.execute(id_c, (id_arquivo, id_usuario_compartilhado))
+            id_compartilhamento = cursor.fetchone()[0]
+
+            sql = '''
+                INSERT INTO usuario_compartilhamento (id_usuario, id_compartilhamento)
+                VALUES(%s,%s)
+            '''
+            valoresIII = (id_usuario_compartilhado, id_compartilhamento)
+            cursor.execute(sql,valoresIII)
+            con.commit()
         else:
             print(" Arquivo nao encontrado.")
     
