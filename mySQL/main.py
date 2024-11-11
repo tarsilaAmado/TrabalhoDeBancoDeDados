@@ -15,6 +15,7 @@ def menu():
     print("8 - Pedir suporte")
     print("9 - Remover arquivo")
     print("10 - Checar tempo de modificação de arquivo")
+    print("11 - Acessar atividades recentes")
     print("0 - Sair")
     
 def main():
@@ -47,6 +48,7 @@ def main():
             fechar_conexao(con)
             return
     elif resposta == "2":
+        login = "root"
         print("Seja bem vindo(a) root\n")
         con = criar_conexao("localhost", "root", "", "webdriver")
     else:
@@ -112,11 +114,17 @@ def main():
             id_arquivo = input("Id do arquivo a ser deletado: ")
             remover_arquivo(con, id_arquivo)
         elif op == 10:
-            id_arquivo = input("Id do arquivo a ser checado: ")
-            if verificacaoDe100Dias(con,id_arquivo):
-                print("Arquivo modificado há mais de 100 dias.\n")
+            if login == "root":
+                id_arquivo = input("Id do arquivo a ser checado: ")
+                if verificacaoDe100Dias(con,id_arquivo):
+                    print("Arquivo modificado há mais de 100 dias.\n")
+                else:
+                    print("Arquivo modificado há menos de 100 dias.\n")
             else:
-                print("Arquivo modificado há menos de 100 dias.\n")
+                print("Erro: acesso negado!\n")
+        elif op == 11:
+
+            visualizar_atividades_R (con,login)
     
     print("Saindo do programa...")
     fechar_conexao(con)
