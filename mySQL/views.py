@@ -1,5 +1,5 @@
 import mysql.connector
-from conexao import criar_conexao, fechar_conexao
+from conexao import *
 
 def idCheck(con,id):
     cursor = con.cursor()
@@ -31,10 +31,10 @@ def acessar_arquivos_usuario(con, id):
         # Criando a view, se ela não existir
         cursor.execute('''
             CREATE VIEW IF NOT EXISTS view_usuario AS 
-            SELECT nome, tipo, PA 
-            FROM Arquivo
-            JOIN Compartilhamento ON Arquivo.ID_arq = Compartilhamento.ID_arq
-            WHERE Compartilhamento.ID_us = %s
+            SELECT nome, tipo, permissao_acesso 
+            FROM arquivo
+            JOIN compartilhamento ON arquivo.id = compartilhamento.id_arquivo
+            WHERE compartilhamento.id_compartilhado = %s
         ''', (id,))
         
         # Consultando a view para obter os dados
@@ -60,8 +60,8 @@ def acessar_arquivos_instituicao(con, id):
             cursor.execute(''' 
             CREATE VIEW IF NOT EXISTS view_instituicao AS
             SELECT *
-            FROM Arquivo
-            JOIN Usuario ON Arquivo.id_usuario = Usuario.id
+            FROM arquivo
+            JOIN usuario ON arquivo.id_usuario = usuario.id
             WHERE usuario.id_instituicao = %s
             ''', (id,))
 
@@ -83,7 +83,7 @@ def acessar_arquivos_ADM(con, id):
             cursor.execute('''  
                 CREATE VIEW IF NOT EXISTS  view_adm as
                 SELECT * 
-                FROM Arquivos
+                FROM arquivos
 
 
                 ''')
@@ -97,6 +97,4 @@ def acessar_arquivos_ADM(con, id):
     except mysql.connector.Error as err:
         print(f"Erro ao acessar arquivos do usuário: {err}")    
     finally:
-        cursor.close()
-
-            
+        cursor.close()    
