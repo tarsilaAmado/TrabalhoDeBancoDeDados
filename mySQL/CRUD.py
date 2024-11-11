@@ -44,7 +44,6 @@ def insere_usuario(con, login, senha, email, data_ingresso, id_instituicao): # i
         valores = (login, senha, email, data_ingresso, id_instituicao)
         cursor.execute(sql, valores)
         con.commit() # Commit após a inserção no banco de dados
-        print("oeooeo")
         print(f"Usuário {login} criado no MySQL.")
         grant_privileges_sql = f"GRANT ALL PRIVILEGES ON webdriver.* TO '{login}'@'localhost';"
         cursor.execute(grant_privileges_sql)
@@ -63,9 +62,8 @@ def insere_usuario(con, login, senha, email, data_ingresso, id_instituicao): # i
         atribuir_role(con, login, escolha)
 
     except Exception as e:
-        print(f"Erro ao criar o usuário no MySQL: {e}")
+        print(f"Erro ao criar o usuário no MySQL: {e}\n")
         con.rollback()  # Em caso de erro, desfaz as mudanças feitas
-        
     cursor.close()
 
 def insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario): # insere um plano
@@ -286,12 +284,12 @@ def acessar_arquivo(con,nome_arquivo):
 def verificacaoDe100Dias(con, id_arquivo):
     cursor = con.cursor()
     try:
-        sql = "SELECT ultima_versao FROM ATIVIDADES_RECENTES WHERE id = %s" #vê a data de modificaçõ pelo id do arq
+        sql = "SELECT ultima_versao FROM ATIVIDADES_RECENTES WHERE id_arquivo = %s" #vê a data de modificaçõ pelo id do arq
         cursor.execute(sql, (id_arquivo,))
         resultado = cursor.fetchone()
         if resultado is None: #verifica se o arquivo existe
             cursor.close()
-            raise ValueError("Arquivo não encontrado")
+            raise ValueError("Arquivo não encontrado!\n")
         data_modificacao = resultado[0]
         if not isinstance(data_modificacao, datetime): # faz uma verificação para ver se tá em datetime
             cursor.close()
@@ -342,3 +340,21 @@ def compartilhar(con, id_arquivo, id_usuario_dono, id_usuario_compartilhado):
     
     finally:
         cursor.close()
+
+
+def visualizar_atividades_R (con,login):
+    cursor = con.cursor()
+    if login == "root":
+        try:
+            sql = "SELECT id_arquivo, ultima_versao, acesso FROM atividades_recentes"
+            cursor.execute(sql)
+            print("")
+            for (id_arquivo, ultima_versao, acesso) in cursor:
+                print(id_arquivo, "| ", ultima_versao, "| ", acesso)
+            print("")
+        except:
+            print("Erro ao visualizar atividades recentes!\n")
+        finally:
+            cursor.close()
+    else:
+        print("Erro: acesso negado!\n")
