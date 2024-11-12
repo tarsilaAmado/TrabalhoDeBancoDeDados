@@ -1,6 +1,6 @@
 import mysql.connector
 from mysql.connector import Error
-from conexao import criar_conexao
+from conexao import *
 from datetime import datetime
 from views import *
 from roles import *
@@ -256,13 +256,14 @@ def acessar_arquivo(con,nome_arquivo):
     cursor = con.cursor()
     try:
 
-        acessar_arquivos_usuario(con,id)
-
+        
         #pega o id do arquivo e procura ele pelo nome do arquivo
         cursor.execute('''SELECT id, permissao_acesso FROM arquivo WHERE nome = %s 
                        ''',(nome_arquivo,))
 
         id_arquivo = cursor.fetchone(0)
+        acessar_arquivos_usuario(con,id_arquivo)
+
         #pega a permissao de acesso
         permissao_acesso = cursor.fetchone(1)
         #faz o check se o usuario tem acesso
