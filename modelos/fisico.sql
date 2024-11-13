@@ -131,6 +131,16 @@ acesso VARCHAR(20) NOT NULL,
 FOREIGN KEY(id_arquivo) REFERENCES arquivo(id)
 );
 
+CREATE TABLE IF NOT EXISTS historico_operacoes (
+id INT AUTO_INCREMENT PRIMARY KEY,
+id_usuario INT NOT NULL,
+id_arquivo INT,
+operacao VARCHAR(100) NOT NULL,
+data_operacao DATE DEFAULT CURRENT_DATE,
+hora_operacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+FOREIGN KEY (id_usuario) REFERENCES usuario(id),
+FOREIGN KEY (id_arquivo) REFERENCES arquivo(id)
+);
 -- # TRIGGERS
 
 DELIMITER //
