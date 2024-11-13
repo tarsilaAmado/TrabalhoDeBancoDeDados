@@ -77,13 +77,25 @@ def insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario): # insere u
 def inserir_adm(con, login):
     cursor = con.cursor()
     try:
-        cursor.execute("SELECT id FROM usuario WHERE login = %s", (login,)) # busca o id do usuário com base no login
+        cursor.execute("SELECT id FROM usuario WHERE login = %s", (login,))  # busca o id do usuário com base no login
         resultado = cursor.fetchone()
         
         if resultado:
             id_usuario = resultado[0]
-            cursor.execute("INSERT INTO adm (id) VALUES (%s)", (id_usuario,)) # insere o id do usuário na tabela adm
+            cursor.execute("INSERT INTO adm (id) VALUES (%s)", (id_usuario,))  # insere o id do usuário na tabela adm
             con.commit()
+
+            # Obtém o id do novo administrador inserido
+            cursor.execute("SELECT id FROM adm WHERE id = %s", (id_usuario,))
+            id_adm = cursor.fetchone()[0]
+
+            # Insere na tabela usuario_adm
+            cursor.execute(
+                "INSERT INTO usuario_adm (id_usuario, id_adm) VALUES (%s, %s)",
+                (id_usuario, id_adm)
+            )
+            con.commit()
+            print("Administrador inserido com sucesso e vinculado ao usuário.")
         else:
             print("Erro: usuário com o login especificado não encontrado.")
             
