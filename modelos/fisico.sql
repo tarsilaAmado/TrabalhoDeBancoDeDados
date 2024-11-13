@@ -176,7 +176,7 @@ BEGIN
 END;
 //
 
-CREATE TRIGGER Registrar_operacao
+CREATE TRIGGER  Registrar_operacao 
 AFTER DELETE ON arquivo
 FOR EACH ROW
 BEGIN
@@ -221,6 +221,9 @@ DELIMITER ;
 CREATE ROLE 'papelADM';
 CREATE ROLE 'papelEmpresa';
 CREATE ROLE 'papelUsuario';
-GRANT SELECT, INSERT, UPDATE ON webdriver.* TO 'papelUsuario'@'localhost';
-GRANT SELECT ON webdriver.* TO 'papelEmpresa'@'localhost';
-GRANT SELECT, INSERT, UPDATE, DELETE, CREATE USER ON webdriver.* TO 'papelADM'@'localhost';
+GRANT SELECT, INSERT, UPDATE ON webdriver.* TO papelUsuario;
+GRANT SELECT ON webdriver.* TO papelEmpresa;
+GRANT SELECT, INSERT, UPDATE, DELETE ON webdriver.* TO papelADM;
+GRANT SELECT, INSERT, UPDATE, DELETE ON mysql.* TO papelADM;
+GRANT  CREATE USER ON *.* TO papelADM;
+

@@ -87,8 +87,10 @@ def acessar_arquivos_ADM(con, id):
 
 
                 ''')
-            
+            cursor.commit()
             view_adm = cursor.execute(''' SELECT * FROM view_adm ''')
+            cursor.commit()
+            
 
             for row in view_adm:
                 print(row)
@@ -98,3 +100,4 @@ def acessar_arquivos_ADM(con, id):
         print(f"Erro ao acessar arquivos do usuário: {err}")    
     finally:
         cursor.close()    
+

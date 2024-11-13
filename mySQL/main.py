@@ -73,7 +73,7 @@ def main():
                 #checa se é adm
                 
                 role = role_check(con, login)
-                print(role)
+                
                 if any('papelADM' in i[0] for i in role):
                     login = input(("Login: "))
                     #checa se o login existe

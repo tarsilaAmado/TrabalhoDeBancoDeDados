@@ -8,24 +8,34 @@ def atribuir_role(con, login, escolha):
     
     try:
         if escolha == "1":
-            cursor.execute("GRANT papelUsuario TO %s@'localhost'", (login,))
-            cursor.execute("FLUSH PRIVILEGES;")
+            
+            cursor.execute(f"GRANT 'papelUsuario' TO '{login}'@'localhost'")
+            con.commit()
+
         elif escolha == "2":
-            cursor.execute("GRANT papelEmpresa TO %s@'localhost'", (login,))
-            cursor.execute("FLUSH PRIVILEGES;")
+            
+            cursor.execute(f"GRANT 'papelEmpresa' TO '{login}'@'localhost'")
+            con.commit()
         elif escolha == "3":
-            cursor.execute("GRANT papelADM TO %s@'localhost'", (login,))
-            cursor.execute("FLUSH PRIVILEGES;")
+            
+            cursor.execute(f"GRANT 'papelADM' TO '{login}'@'localhost'")
+            con.commit()
         else:
             print("Opção de role inválida.")
-            return
+            return None
+        #debug
+        cursor.execute(f"SHOW GRANTS FOR '{login}'@'localhost';")
+        grants = cursor.fetchall()
         
-        con.commit()  # Commitando a alteração
+        
         print("Role atribuída com sucesso.\n")
+        #pra testes
+        return grants
 
     except mysql.connector.Error as e:
         print(f"Erro ao atribuir role : {e}")
+        return None
         
     finally:
-        con.commit()
+        
         cursor.close()
