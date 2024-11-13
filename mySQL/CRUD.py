@@ -34,37 +34,51 @@ def insere_instituicao(con, nome, endereco, causa_social): # insere uma institui
     cursor.close()
     con.commit() # dando commit pois foi feita uma alteração no banco de dados
 
-def insere_usuario(con, login, senha, email, data_ingresso, id_instituicao): # insere um usuário
+import mysql.connector
+
+def insere_usuario(con, login, senha, email, data_ingresso, id_instituicao, is_adm=False, role=None): 
     cursor = con.cursor()
     try:
-        # Note que estamos usando string formatting seguro para evitar SQL injection
-        create_user_sql = f"CREATE USER '{login}'@'localhost' IDENTIFIED BY '{senha}';"
-        cursor.execute(create_user_sql)
-        sql = "INSERT INTO usuario (login, senha, email, data_ingresso, id_instituicao) values (%s, %s, %s, %s, %s)"
+        
+        create_user_sql = "CREATE USER %s@'localhost' IDENTIFIED BY %s;"
+        cursor.execute(create_user_sql, (login, senha))
+        
+        
+        sql = "INSERT INTO usuario (login, senha, email, data_ingresso, id_instituicao) VALUES (%s, %s, %s, %s, %s)"
         valores = (login, senha, email, data_ingresso, id_instituicao)
         cursor.execute(sql, valores)
-        con.commit() # Commit após a inserção no banco de dados
-        print(f"Usuário {login} criado no MySQL.")
-        grant_privileges_sql = f"GRANT ALL PRIVILEGES ON webdriver.* TO '{login}'@'localhost';"
-        cursor.execute(grant_privileges_sql)
         con.commit()
-        # Recarrega as permissões para que entrem em vigor
+        
+        print(f"Usuário {login} criado no MySQL e inserido na tabela usuario.")
+
+       
+        grant_privileges_sql = "GRANT ALL PRIVILEGES ON webdriver.* TO %s@'localhost';"
+        cursor.execute(grant_privileges_sql, (login,))
+        
+       
         cursor.execute("FLUSH PRIVILEGES;")
         con.commit()
 
-        resposta = int(input(("\nÉ administrador?\n1 - sim\n2- não\n")))
-        if resposta == 1:
+        
+        if is_adm:
             inserir_adm(con, login)
-        print("Usuário adicionado com sucesso!\n")
-        login = input("Login do usuário a receber a role: ")
-        print("Role a ser atribuida:\n1 - Usuário\n2 - Empresa\n3 - ADM")
-        escolha = input("Escolha: ")
-        atribuir_role(con, login, escolha)
+            print(f"Usuário {login} adicionado como administrador.")
 
-    except Exception as e:
-        print(f"Erro ao criar o usuário no MySQL: {e}\n")
-        con.rollback()  # Em caso de erro, desfaz as mudanças feitas
-    cursor.close()
+       
+        if role:
+            atribuir_role(con, login, role)
+            print(f"Role '{role}' atribuída ao usuário {login}.")
+
+        print("Usuário adicionado com sucesso!")
+
+    except mysql.connector.Error as e:
+        print(f"Erro ao criar o usuário no MySQL: {e}")
+        con.rollback()  
+    finally:
+        cursor.close()
+
+
+
 
 def insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario): # insere um plano
     cursor = con.cursor()
