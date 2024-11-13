@@ -16,6 +16,8 @@ def menu():
     print("9 - Remover arquivo")
     print("10 - Checar tempo de modificação de arquivo")
     print("11 - Acessar atividades recentes")
+    print("12 - Visualizar histórico de operações")
+    print("13 - visualisar arquivos de usuários da empresa/")
     print("0 - Sair")
     
 def main():
@@ -102,6 +104,7 @@ def main():
             causa_social = input(("Causa social: "))
             insere_instituicao(con, nome, endereco, causa_social)
             print("Instituição adicionada com sucesso!\n")
+        
         elif op == 3: # cria arquivo
             nome = input("Nome do arquivo: ")
             tipo = input("Tipo (exemplo: .exe): ")
@@ -109,32 +112,39 @@ def main():
             id_usuario = input("Id do usuário: ")
             url = input("URL: ")
             adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url)
+        
         elif op == 4: # fazer comentário
             id_arquivo = input(("Id do arquivo: "))
             conteudo = input(("Conteúdo do comentário: "))
             fazerComentario(con, id_arquivo, conteudo, login)
+        
         elif op == 5: # criar plano
             nome = input(("Nome: "))
             duracao = input(("Duração (HH:MM:SS): "))
-            data_aquisicao = input(("Data de aquisição (AAAA-MM-DD): "))
+            data_aquisicao = input(("Data de aquisição (AAAA-MM-DD): ")) 
             espaco_usuario = input(("Espaço do usuário: "))
             insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario)
+
         elif op == 6: # compartilhar arquivo
             id_arquivo = input("Id do arquivo: ")
             id_dono = input(("Id do dono: "))
             id_compartilhado = input(("Id do compartilhado: "))
             compartilhar(con, id_arquivo, id_dono, id_compartilhado)
+
         elif op == 7: # acessar arquivo específico
             nome_arquivo = input(("Nome do arquivo: "))
-            acessar_arquivo(con, nome_arquivo)
+            acessar_arquivo(con, nome_arquivo
+                            )
         elif op == 8: # pedir suporte
             id_arquivo = input(("Sobre que arquivo você deseja pedir o supórte (id)? " ))
             mensagem = input(("Descrição do suporte: "))
             pedir_suporte(con, id_arquivo, mensagem, login)
+
         elif op == 9:  # remover arquivo
             id_arquivo = input("Id do arquivo a ser deletado: ")
             remover_arquivo(con, id_arquivo)
-        elif op == 10:
+
+        elif op == 10: # verificar 100 dias
             if login == "root":
                 id_arquivo = input("Id do arquivo a ser checado: ")
                 if verificacaoDe100Dias(con,id_arquivo):
@@ -143,13 +153,18 @@ def main():
                     print("Arquivo modificado há menos de 100 dias.\n")
             else:
                 print("Erro: acesso negado!\n")
-        elif op == 11:
 
+        elif op == 11: # visualizar atividades recentes
             visualizar_atividades_R (con,login)
-    
+
+        elif op == 12: # visualizar histórico de versionamento
+            print("fazer")
+            # visualizar_historico_v(con,login)
+            #terminar a logica ainda
+
     print("Saindo do programa...")
     fechar_conexao(con)
 
 
-if __name__ == "__main__":
-    main()
+if _name_ == "_main_":
+    main()
