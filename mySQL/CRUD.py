@@ -359,7 +359,7 @@ def visualizar_atividades_R (con,login):
     else:
         print("Erro: acesso negado!\n")
 
-def user_check(login):
+def root_check(login):
     if login == "root":
         return True
     else:

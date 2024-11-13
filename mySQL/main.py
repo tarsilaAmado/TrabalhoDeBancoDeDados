@@ -70,7 +70,7 @@ def main():
 
         if op == 1: # insere usuário
             #checa se é root ou usuario
-            if user_check(login) == False :
+            if root_check(login) == False :
                 #False = user, True = root
                 #checa se é adm
                 
