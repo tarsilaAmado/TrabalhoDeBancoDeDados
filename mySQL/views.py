@@ -101,3 +101,32 @@ def acessar_arquivos_ADM(con, id):
     finally:
         cursor.close()    
 
+def acessar_historico_operacoes(con):
+    cursor = con.cursor()
+    try:
+        cursor.execute('''
+            CREATE VIEW IF NOT EXISTS view_historico_operacoes AS
+            SELECT 
+                historico_operacoes.operacao AS Operacao,
+                usuario.login AS Usuario,
+                arquivo.nome AS Arquivo,
+                historico_operacoes.data_operacao AS Data,
+                historico_operacoes.hora_operacao AS Hora
+            FROM 
+                historico_operacoes
+            JOIN 
+                usuario ON historico_operacoes.id_usuario = usuario.id
+            LEFT JOIN 
+                arquivo ON historico_operacoes.id_arquivo = arquivo.id;
+        ''')
+        
+        cursor.execute('SELECT * FROM view_historico_operacoes')
+        historico_operacoes = cursor.fetchall()
+        for row in historico_operacoes:
+            print(row)
+            
+    except mysql.connector.Error as err:
+        print(f"Erro ao acessar histórico de operações: {err}")
+        
+    finally:
+        cursor.close()
