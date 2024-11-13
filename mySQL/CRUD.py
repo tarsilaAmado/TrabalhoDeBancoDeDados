@@ -256,13 +256,13 @@ def acessar_arquivo(con,nome_arquivo):
     cursor = con.cursor()
     try:
 
-        acessar_arquivos_usuario(con,id)
 
         #pega o id do arquivo e procura ele pelo nome do arquivo
         cursor.execute('''SELECT id, permissao_acesso FROM arquivo WHERE nome = %s 
                        ''',(nome_arquivo,))
 
         id_arquivo = cursor.fetchone(0)
+        acessar_arquivos_usuario(con,id_arquivo)
         #pega a permissao de acesso
         permissao_acesso = cursor.fetchone(1)
         #faz o check se o usuario tem acesso
@@ -358,3 +358,24 @@ def visualizar_atividades_R (con,login):
             cursor.close()
     else:
         print("Erro: acesso negado!\n")
+
+def user_check(login):
+    if login == "root":
+        return True
+    else:
+        return False
+    
+def role_check(con, login):
+    #função que checa os grants do usuario
+    cursor = con.cursor()
+    try:
+        cursor.execute(f"SHOW GRANTS FOR '{login}'@'localhost';")
+        resultados = cursor.fetchall()
+        return resultados
+    except mysql.connector.Error as e:
+        print(f"Erro ao checar grants arquivo: {e}")
+
+    finally:
+        cursor.close()
+        
+        

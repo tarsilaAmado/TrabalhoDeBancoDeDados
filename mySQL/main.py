@@ -67,14 +67,35 @@ def main():
             continue
 
         if op == 1: # insere usuário
-            login = input(("Login: "))
-            #checa se o login existe
-            senha = input(("Senha: "))
-            #checa se a senha está correta
-            email = input(("Email: "))
-            data_ingresso = input(("Data de ingresso: "))
-            id_instituicao = input(("Id da instituição: "))
-            insere_usuario(con, login, senha, email, data_ingresso, id_instituicao)
+            #checa se é root ou usuario
+            if user_check(login) == False :
+                #False = user, True = root
+                #checa se é adm
+                
+                role = role_check(con, login)
+                print(role)
+                if any('papelADM' in i[0] for i in role):
+                    login = input(("Login: "))
+                    #checa se o login existe
+                    senha = input(("Senha: "))
+                    #checa se a senha está correta
+                    email = input(("Email: "))
+                    data_ingresso = input(("Data de ingresso: "))
+                    id_instituicao = input(("Id da instituição: "))
+                    insere_usuario(con, login, senha, email, data_ingresso, id_instituicao)
+                else:
+                    #se ele nao for adm 
+                    break
+            else:
+                login = input(("Login: "))
+                #checa se o login existe
+                senha = input(("Senha: "))
+                #checa se a senha está correta
+                email = input(("Email: "))
+                data_ingresso = input(("Data de ingresso: "))
+                id_instituicao = input(("Id da instituição: "))
+                insere_usuario(con, login, senha, email, data_ingresso, id_instituicao)
+                
         elif op == 2: # insere instituição
             nome = input(("Nome: "))
             endereco = input(("Endereço: "))
