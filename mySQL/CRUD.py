@@ -344,7 +344,8 @@ def compartilhar(con, id_arquivo, id_usuario_dono, id_usuario_compartilhado):
 
 def visualizar_atividades_R (con,login):
     cursor = con.cursor()
-    if login == "root":
+    role = role_check(login)
+    if login == "root" or any('papelADM' in i[0] for i in role):
         try:
             sql = "SELECT id_arquivo, ultima_versao, acesso FROM atividades_recentes"
             cursor.execute(sql)
@@ -359,11 +360,6 @@ def visualizar_atividades_R (con,login):
     else:
         print("Erro: acesso negado!\n")
 
-def root_check(login):
-    if login == "root":
-        return True
-    else:
-        return False
     
 def role_check(con, login):
     #função que checa os grants do usuario

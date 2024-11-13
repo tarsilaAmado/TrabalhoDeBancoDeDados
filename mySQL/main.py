@@ -70,8 +70,8 @@ def main():
 
         if op == 1: # insere usuário
             #checa se é root ou usuario
-            if root_check(login) == False :
-                #False = user, True = root
+            if login == "root":
+                
                 #checa se é adm
                 
                 role = role_check(con, login)
