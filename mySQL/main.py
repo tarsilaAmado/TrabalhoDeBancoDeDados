@@ -145,14 +145,23 @@ def main():
             remover_arquivo(con, id_arquivo)
 
         elif op == 10: # verificar 100 dias
-            if login == "root":
+            if login == "root" :
                 id_arquivo = input("Id do arquivo a ser checado: ")
                 if verificacaoDe100Dias(con,id_arquivo):
                     print("Arquivo modificado há mais de 100 dias.\n")
                 else:
                     print("Arquivo modificado há menos de 100 dias.\n")
             else:
-                print("Erro: acesso negado!\n")
+                role = role_check(con, login)
+                
+                if any('papelADM' in i[0] for i in role):
+                    id_arquivo = input("Id do arquivo a ser checado: ")
+                    if verificacaoDe100Dias(con,id_arquivo):
+                        print("Arquivo modificado há mais de 100 dias.\n")
+                    else:
+                        print("Arquivo modificado há menos de 100 dias.\n")
+                else:
+                    print("Erro: acesso negado!\n")
 
         elif op == 11: # visualizar atividades recentes
             visualizar_atividades_R (con,login)
@@ -166,5 +175,7 @@ def main():
     fechar_conexao(con)
 
 
-if _name_ == "_main_":
-    main()
+if __name__ == "__main__":
+    main()
+
+
