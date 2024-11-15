@@ -115,9 +115,9 @@ class TestInserts:
         resultado = self.cursor.fetchall()
         assert resultado != None
     
-    def test_inserir_adm(self):
-        inserir_adm(self.con, self.login)
-        self.cursor.execute(f"SELECT FROM  WHERE ")
+    #def test_inserir_adm(self):
+        #inserir_adm(self.con, self.login)
+        #self.cursor.execute(f"SELECT FROM  WHERE ")
         
 
 class TestGetsEChecks:
@@ -129,4 +129,24 @@ class TestGetsEChecks:
         resultado = get_id(self.con, self.login)
         print(resultado)
         assert resultado == 13
+
+class TestFuncoes:
+    login = 'joao'
+    senha = 'joao123'
+    con =  criar_conexao("localhost", login, senha, "webdriver")
+
+class TestViews:
+    
+    
+    def test_acessar_arquivos_usuario(self):
+        login = 'joao'
+        senha = 'joao123'
+        con =  criar_conexao("localhost", login, senha, "webdriver")
+        id = get_id(con, login)
+        resultado = acessar_arquivos_usuario(con, id)
+        print(resultado)
+        assert resultado != None
+
+        
+    
     

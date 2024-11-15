@@ -327,7 +327,7 @@ def compartilhar(con, id_arquivo, id_usuario_dono, id_usuario_compartilhado):
         cursor.execute("SELECT id FROM arquivo WHERE id = %s AND id_usuario = %s", (id_arquivo, id_usuario_dono))
         arquivo_existe = cursor.fetchone()
 
-        if arquivo_existe:
+        if arquivo_existe != None:
             sql = """
                 INSERT INTO compartilhamento (id_arquivo, id_dono, id_compartilhado, data_c)
                 VALUES (%s, %s, %s, %s)

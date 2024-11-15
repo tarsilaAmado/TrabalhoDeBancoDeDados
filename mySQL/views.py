@@ -34,16 +34,17 @@ def acessar_arquivos_usuario(con, id):
             SELECT nome, tipo, permissao_acesso 
             FROM arquivo
             JOIN compartilhamento ON arquivo.id = compartilhamento.id_arquivo
-            WHERE compartilhamento.id_compartilhado = %s
-        ''', (id,))
+            
+        ''')
         
         # Consultando a view para obter os dados
-        cursor.execute('SELECT * FROM view_usuario')
+        cursor.execute('SELECT * FROM view_usuario WHERE compartilhamento.id_compartilhado = %s', (id,))
         view_usuario = cursor.fetchall()
         
         # Exibindo os resultados
         for row in view_usuario:
             print(row)
+        return view_usuario
             
     except mysql.connector.Error as err:
         print(f"Erro ao acessar arquivos do usuário: {err}")
@@ -62,8 +63,7 @@ def acessar_arquivos_instituicao(con, id):
             SELECT *
             FROM arquivo
             JOIN usuario ON arquivo.id_usuario = usuario.id
-            WHERE usuario.id_instituicao = %s
-            ''', (id,))
+            ''',)
 
             view_instituicao = cursor.execute('''SELECT * FROM view_instituicao ''')
             for row in view_instituicao:
@@ -130,3 +130,22 @@ def acessar_historico_operacoes(con):
         
     finally:
         cursor.close()
+
+def acessar_arquivos_root(con, login):
+    cursor = con.cursor()
+
+    try:
+        if(login == "root"):
+            cursor.execute("SELECT * from arquivo")
+            arquivos = cursor.fetchall()
+            for row in cursor:
+                print(row)
+        else :
+            print("Acesso bloqueado!")
+        
+    except mysql.connector.Error as err:
+        print(f"Erro ao acessar histórico de operações: {err}")
+    
+    finally:
+        cursor.close()
+    

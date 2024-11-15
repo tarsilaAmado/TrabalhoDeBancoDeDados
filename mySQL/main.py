@@ -128,8 +128,12 @@ def main():
 
         elif op == 6: # compartilhar arquivo
             id_arquivo = input("Id do arquivo: ")
-            id_dono = input(("Id do dono: "))
-            id_compartilhado = input(("Id do compartilhado: "))
+            # id_dono = input(("Id do dono: "))
+            #vai pegar o ID do dono por função
+            id_dono = get_id(con, login)
+            #vai pegar o id do compartilhado
+            login_compartilhado = input(("Login do compartilhado: "))
+            id_compartilhado = get_id(con, login_compartilhado)
             compartilhar(con, id_arquivo, id_dono, id_compartilhado)
 
         elif op == 7: # acessar arquivo específico
@@ -171,8 +175,13 @@ def main():
             acessar_historico_operacoes(con)
             #terminar a logica ainda
         elif op == 13:
-            role = role_check(login)
-            if any('papelADM' in i[0] for i in role):
+            #veifica qual o role do usuario atual
+            role = role_check(con,login)
+            #exibe os arquivos baseado no role
+            if login == "root":
+                #acessar tudo se for root
+                acessar_arquivos_root(con, login)
+            elif any('papelADM' in i[0] for i in role):
                 #views adm
                 id = get_id(con, login)
                 acessar_arquivos_ADM(con, id)
