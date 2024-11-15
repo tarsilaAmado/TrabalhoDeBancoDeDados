@@ -36,12 +36,12 @@ def insere_instituicao(con, nome, endereco, causa_social): # insere uma institui
 
 
 
-def insere_usuario(con, login, senha, email, data_ingresso, id_instituicao, is_adm=False, role=None): 
+def insere_usuario(con, login, senha, email, data_ingresso, id_instituicao): 
     cursor = con.cursor()
     try:
         
         create_user_sql = "CREATE USER %s@'localhost' IDENTIFIED BY %s;"
-        cursor.execute(create_user_sql, (login, senha))
+        cursor.execute(create_user_sql, (login, senha,))
         
         
         sql = "INSERT INTO usuario (login, senha, email, data_ingresso, id_instituicao) VALUES (%s, %s, %s, %s, %s)"
@@ -51,25 +51,19 @@ def insere_usuario(con, login, senha, email, data_ingresso, id_instituicao, is_a
         
         print(f"Usuário {login} criado no MySQL e inserido na tabela usuario.")
 
-       
-        grant_privileges_sql = "GRANT ALL PRIVILEGES ON webdriver.* TO %s@'localhost';"
-        cursor.execute(grant_privileges_sql, (login,))
+        print("Qual o role do novo usuario ?")
+        print("1 - Usuario")
+        print("2 - EMpresa")
+        print("3 - ADM")
+        escolha = input()
+        debug = atribuir_role(con,login,escolha)
+        #debug
         
-       
-        cursor.execute("FLUSH PRIVILEGES;")
-        con.commit()
-
         
-        if is_adm:
-            inserir_adm(con, login)
-            print(f"Usuário {login} adicionado como administrador.")
-
-       
-        if role:
-            atribuir_role(con, login, role)
-            print(f"Role '{role}' atribuída ao usuário {login}.")
-
+        #fim do debug
         print("Usuário adicionado com sucesso!")
+
+        
 
     except mysql.connector.Error as e:
         print(f"Erro ao criar o usuário no MySQL: {e}")
@@ -80,13 +74,14 @@ def insere_usuario(con, login, senha, email, data_ingresso, id_instituicao, is_a
 
 
 
+
 def insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario): # insere um plano
     cursor = con.cursor()
     sql = "INSERT INTO plano (nome, duracao, data_aquisicao, espaco_usuario) values (%s, %s, %s, %s)"
     valores = (nome, duracao, data_aquisicao, espaco_usuario)
     cursor.execute(sql, valores)
-    cursor.close()
     con.commit() # dando commit pois foi feita uma alteração no banco de dados
+    cursor.close()
 
 def inserir_adm(con, login):
     cursor = con.cursor()
@@ -287,16 +282,14 @@ def acessar_arquivo(con,nome_arquivo):
         cursor.execute('''SELECT id, permissao_acesso FROM arquivo WHERE nome = %s 
                        ''',(nome_arquivo,))
 
-        id_arquivo = cursor.fetchone(0)
+        id_arquivo = cursor.fetchone()
         acessar_arquivos_usuario(con,id_arquivo)
         #pega a permissao de acesso
         permissao_acesso = cursor.fetchone(1)
         #faz o check se o usuario tem acesso
         if permissao_acesso == "público" or permissao_acesso == "público/compartilhado" or permissao_acesso == "privado/compartilhado": 
             #usando o id_arquivo faz os select necessarios
-            cursor.execute(''' SELECT nome, tipo, url, id_usuario, 
-                        FROM arquivo 
-                        WHERE id = %s'''(id_arquivo,))
+            cursor.execute(''' SELECT nome, tipo, url, id_usuario FROM arquivo WHERE id = %s'''(id_arquivo,))
 
         else :
             print(f"Usuario não tem acesso a arquivo {id_arquivo}")
@@ -386,7 +379,12 @@ def visualizar_atividades_R (con,login):
     else:
         print("Erro: acesso negado!\n")
 
-    
+def get_id(con, login):
+    cursor = con.cursor()
+    cursor.execute("SELECT id FROM usuario WHERE login = %s", (login,)) # busca o id do usuário com base no login
+    resultado = cursor.fetchone()
+    return resultado[0]
+
 def role_check(con, login):
     #função que checa os grants do usuario
     cursor = con.cursor()

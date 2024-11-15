@@ -17,7 +17,7 @@ def menu():
     print("10 - Checar tempo de modificação de arquivo")
     print("11 - Acessar atividades recentes")
     print("12 - Visualizar histórico de operações")
-    print("13 - visualisar arquivos de usuários da empresa/")
+    print("13 - visualisar arquivos ")
     print("0 - Sair")
     
 def main():
@@ -71,32 +71,33 @@ def main():
         if op == 1: # insere usuário
             #checa se é root ou usuario
             if login == "root":
-                
-                #checa se é adm
-                
-                role = role_check(con, login)
-                
-                if any('papelADM' in i[0] for i in role):
-                    login = input(("Login: "))
-                    #checa se o login existe
-                    senha = input(("Senha: "))
-                    #checa se a senha está correta
-                    email = input(("Email: "))
-                    data_ingresso = input(("Data de ingresso: "))
-                    id_instituicao = input(("Id da instituição: "))
-                    insere_usuario(con, login, senha, email, data_ingresso, id_instituicao)
-                else:
-                    #se ele nao for adm 
-                    break
-            else:
-                login = input(("Login: "))
+                login_input = input(("Login: "))
                 #checa se o login existe
                 senha = input(("Senha: "))
                 #checa se a senha está correta
                 email = input(("Email: "))
                 data_ingresso = input(("Data de ingresso: "))
                 id_instituicao = input(("Id da instituição: "))
-                insere_usuario(con, login, senha, email, data_ingresso, id_instituicao)
+                insere_usuario(con, login_input, senha, email, data_ingresso, id_instituicao)
+                
+            else:
+                #checa se é adm
+                
+                role = role_check(con, login)
+                
+                if any('papelADM' in i[0] for i in role):
+                    login_input = input(("Login: "))
+                    #checa se o login existe
+                    senha = input(("Senha: "))
+                    #checa se a senha está correta
+                    email = input(("Email: "))
+                    data_ingresso = input(("Data de ingresso: "))
+                    id_instituicao = input(("Id da instituição: "))
+                    insere_usuario(con, login_input, senha, email, data_ingresso, id_instituicao)
+                else:
+                    #se ele nao for adm 
+                    print("")
+                    break
                 
         elif op == 2: # insere instituição
             nome = input(("Nome: "))
@@ -133,8 +134,7 @@ def main():
 
         elif op == 7: # acessar arquivo específico
             nome_arquivo = input(("Nome do arquivo: "))
-            acessar_arquivo(con, nome_arquivo
-                            )
+            acessar_arquivo(con, nome_arquivo)
         elif op == 8: # pedir suporte
             id_arquivo = input(("Sobre que arquivo você deseja pedir o supórte (id)? " ))
             mensagem = input(("Descrição do suporte: "))
@@ -168,8 +168,22 @@ def main():
 
         elif op == 12: # visualizar histórico de versionamento
             print("fazer")
-            # visualizar_historico_v(con,login)
+            acessar_historico_operacoes(con)
             #terminar a logica ainda
+        elif op == 13:
+            role = role_check(login)
+            if any('papelADM' in i[0] for i in role):
+                #views adm
+                id = get_id(con, login)
+                acessar_arquivos_ADM(con, id)
+            elif any('papelEmpresa' in i[0] for i in role):
+                #views empresa
+                id = get_id(con, login)
+                acessar_arquivos_instituicao(con, id)
+            elif any('papelUsuario' in i[0] for i in role):
+                #views usuario
+                id = get_id(con, login)
+                acessar_arquivos_usuario(con,id)
 
     print("Saindo do programa...")
     fechar_conexao(con)

@@ -119,7 +119,7 @@ def acessar_historico_operacoes(con):
             LEFT JOIN 
                 arquivo ON historico_operacoes.id_arquivo = arquivo.id;
         ''')
-        
+
         cursor.execute('SELECT * FROM view_historico_operacoes')
         historico_operacoes = cursor.fetchall()
         for row in historico_operacoes:

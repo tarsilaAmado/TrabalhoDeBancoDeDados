@@ -89,13 +89,36 @@ class TestRoles:
         resultado = atribuir_role(con, "root", "3")
         print(resultado)
         assert any('papelADM' in grant[0] for grant in resultado)
+
+    
     
     
 class TestInserts:
-    login = 'usuario'
+    login = 'augusto'
     senha= 'novo'
-    con =  criar_conexao("localhost", login, senha, "webdriver")
+    con =  criar_conexao("localhost", "root", "", "webdriver")
+    cursor = con.cursor()
+
+    # def test_insere_usuario(self):
+    #     insere_usuario(self.con,self.login,self.login, "usuarionovo", "2024-12-12", "1")
+    #     self.cursor.execute(f'''SELECT id, login, senha, email FROM usuario WHERE login = '{self.login}'''')
+
+    #     resultado = self.cursor.fetchall() 
+    #     print(resultado)
+    #     assert resultado != None
+        
+
+    def test_insere_plano(self):
+        nome = "plano Teste"
+        insere_plano(self.con, nome, "01:59:59", "2024-12-12", "usuario")
+        self.cursor.execute(f"SELECT id, nome, duracao, data_aquisicao, espaco_usuario FROM plano WHERE nome = '{nome}'")
+        resultado = self.cursor.fetchall()
+        assert resultado != None
     
+    def test_inserir_adm(self):
+        inserir_adm(self.con, self.login)
+        self.cursor.execute(f"SELECT FROM  WHERE ")
+        
 
 class TestGetsEChecks:
     login = 'joao'
