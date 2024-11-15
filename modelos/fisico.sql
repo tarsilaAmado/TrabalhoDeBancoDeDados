@@ -136,7 +136,7 @@ id INT AUTO_INCREMENT PRIMARY KEY,
 id_usuario INT NOT NULL,
 id_arquivo INT,
 operacao VARCHAR(100) NOT NULL,
-data_operacao DATE DEFAULT CURRENT_DATE,
+data_operacao DATE DEFAULT (CURRENT_DATE),
 hora_operacao DATETIME DEFAULT CURRENT_TIMESTAMP,
 FOREIGN KEY (id_usuario) REFERENCES usuario(id),
 FOREIGN KEY (id_arquivo) REFERENCES arquivo(id)
@@ -156,19 +156,49 @@ BEGIN
 END;
 //
 
-CREATE TRIGGER Registrar_operacao
-AFTER UPDATE ON arquivo
+CREATE TRIGGER atividades_recentes_insert
+AFTER INSERT ON `arquivo` 
 FOR EACH ROW
 BEGIN
-    IF EXISTS (SELECT 1 FROM atividades_recentes WHERE id_arquivo = NEW.id) THEN
+IF EXISTS (SELECT 1 FROM atividades_recentes WHERE id_arquivo = NEW.id) THEN
         UPDATE atividades_recentes 
         SET ultima_versao = CURDATE()
         WHERE id_arquivo = NEW.id;
     ELSE
         INSERT INTO atividades_recentes (id_arquivo, ultima_versao, acesso)
-        VALUES (NEW.id, CURDATE(), 'default');
+        VALUES (NEW.id, CURDATE(), 'prioritário');
     END IF;
-END;
+END
+//
+
+CREATE TRIGGER atividades_recentes_update
+AFTER UPDATE ON `arquivo`
+FOR EACH ROW
+BEGIN
+	IF EXISTS (SELECT 1 FROM atividades_recentes WHERE id_arquivo = NEW.id) THEN
+        UPDATE atividades_recentes 
+        SET ultima_versao = CURDATE()
+        WHERE id_arquivo = NEW.id;
+    ELSE
+        INSERT INTO atividades_recentes (id_arquivo, ultima_versao, acesso)
+        VALUES (NEW.id, CURDATE(), 'prioritário');
+    END IF;
+END
+//
+
+CREATE TRIGGER atividades_recentes_delete
+AFTER DELETE ON `arquivo`
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT 1 FROM atividades_recentes WHERE id_arquivo = OLD.id) THEN
+        UPDATE atividades_recentes 
+        SET ultima_versao = CURDATE()
+        WHERE id_arquivo = OLD.id;
+    ELSE
+        INSERT INTO atividades_recentes (id_arquivo, ultima_versao, acesso)
+        VALUES (OLD.id, CURDATE(), 'prioritário');
+    END IF;
+END
 //
 
 CREATE TRIGGER Registrar_operacao
@@ -182,21 +212,6 @@ BEGIN
     ELSE
         INSERT INTO atividades_recentes (id_arquivo, ultima_versao, acesso)
         VALUES (NEW.id, CURDATE(), 'default');
-    END IF;
-END;
-//
-
-CREATE TRIGGER  Registrar_operacao 
-AFTER DELETE ON arquivo
-FOR EACH ROW
-BEGIN
-    IF EXISTS (SELECT 1 FROM atividades_recentes WHERE id_arquivo = OLD.id) THEN
-        UPDATE atividades_recentes 
-        SET ultima_versao = CURDATE()
-        WHERE id_arquivo = OLD.id;
-    ELSE
-        INSERT INTO atividades_recentes (id_arquivo, ultima_versao, acesso)
-        VALUES (OLD.id, CURDATE(), 'default');
     END IF;
 END;
 //
@@ -236,4 +251,3 @@ GRANT SELECT ON webdriver.* TO papelEmpresa;
 GRANT SELECT, INSERT, UPDATE, DELETE ON webdriver.* TO papelADM;
 GRANT SELECT, INSERT, UPDATE, DELETE ON mysql.* TO papelADM;
 GRANT  CREATE USER ON *.* TO papelADM;
-

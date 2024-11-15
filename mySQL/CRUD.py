@@ -34,7 +34,7 @@ def insere_instituicao(con, nome, endereco, causa_social): # insere uma institui
     cursor.close()
     con.commit() # dando commit pois foi feita uma alteração no banco de dados
 
-import mysql.connector
+
 
 def insere_usuario(con, login, senha, email, data_ingresso, id_instituicao, is_adm=False, role=None): 
     cursor = con.cursor()
