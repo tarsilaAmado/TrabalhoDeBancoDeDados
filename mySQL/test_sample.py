@@ -91,5 +91,19 @@ class TestRoles:
         assert any('papelADM' in grant[0] for grant in resultado)
     
     
+class TestInserts:
+    login = 'usuario'
+    senha= 'novo'
+    con =  criar_conexao("localhost", login, senha, "webdriver")
+    
 
+class TestGetsEChecks:
+    login = 'joao'
+    senha = 'joao123'
+    con =  criar_conexao("localhost", login, senha, "webdriver")
+    
+    def test_get_id(self):
+        resultado = get_id(self.con, self.login)
+        print(resultado)
+        assert resultado == 13
     
