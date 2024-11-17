@@ -80,16 +80,21 @@ def insere_usuario(con, login, senha, email, data_ingresso, id_instituicao):
         cursor.close()
 
 
-
-
-
 def insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario): # insere um plano
     cursor = con.cursor()
-    sql = "INSERT INTO plano (nome, duracao, data_aquisicao, espaco_usuario) values (%s, %s, %s, %s)"
-    valores = (nome, duracao, data_aquisicao, espaco_usuario)
-    cursor.execute(sql, valores)
-    con.commit() # dando commit pois foi feita uma alteração no banco de dados
-    cursor.close()
+    try:
+        sql = "INSERT INTO plano (nome, duracao, data_aquisicao, espaco_usuario) values (%s, %s, %s, %s)"
+        valores = (nome, duracao, data_aquisicao, espaco_usuario)
+        cursor.execute(sql, valores)
+        con.commit() # dando commit pois foi feita uma alteração no banco de dados
+ 
+        print(f"Plano {nome} criado no MySQL e inserido na tabela planos.\n")
+ 
+    except mysql.connector.Error as e:
+        print(f"Erro ao criar o usuário no MySQL: {e}")
+        con.rollback()  
+    finally:
+        cursor.close()
 
 def inserir_adm(con, login):
     cursor = con.cursor()
