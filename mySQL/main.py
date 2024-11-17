@@ -2,7 +2,8 @@ from conexao import criar_conexao, fechar_conexao
 from roles import *
 from views import *
 from CRUD import *
-
+from procedures import *
+ 
 def menu():
     print("Opções: ")
     print("1 - Criar usuário")
@@ -17,36 +18,40 @@ def menu():
     print("10 - Checar tempo de modificação de arquivo")
     print("11 - Acessar atividades recentes")
     print("12 - Visualizar histórico de operações")
-    print("13 - visualisar arquivos ")
+    print("13 - Visualisar arquivos")
+    print("14 - Atualizar atividades recentes com a data atual")
+    print("15 - Total de usuários com acesso a um arquivo")
+    print("16 - Trocar acesso não prioritário para prioritário de um arquivo")
+    print("17 - Remover acessos de arquivo")
     print("0 - Sair")
-    
+   
 def main():
-
+ 
     print("Entrar:\n1 - Com login\n2 - Como root")
     resposta = input("Escolha: ")
-
-    
-
+ 
+   
+ 
     if resposta == "1":
         global login
         login = None
-
+ 
         login_input = input(("Login: "))
         senha = input(("Senha: "))
-        
+       
         con = criar_conexao("localhost", login_input, senha, "webdriver")
         if con is None:
-            print("Falha na conexão com o banco de dados.")
+            print("Falha na conexão com o banco de dados.\n")
             return
-        
+       
         # checa se o login existe
         # checa se a senha bate com o login
-        
+       
         if check_login(con, login_input, senha):
             login = login_input
             print(f"Login realizado, seja bem vindo(a) {login}\n")
         else:
-            print("Não foi possivel realizar login, login ou senha invalidos")
+            print("Não foi possivel realizar login, login ou senha invalidos.\n")
             fechar_conexao(con)
             return
     elif resposta == "2":
@@ -56,21 +61,21 @@ def main():
     else:
         print("Opção inválida.")
         return
-
-    op = -1; 
+ 
+    op = -1;
     while op != 0:
-
+ 
         menu()
-
+ 
         try:
             op = int(input("Escolha: "))
         except ValueError:
             print("Entrada inválida, por favor, insira um número.")
             continue
-
+ 
         if op == 1: # insere usuário
-            #checa se é root ou usuario
-            if login == "root":
+            role = role_check(con, login)
+            if login == "root" or any('papelADM' in i[0] for i in role):
                 login_input = input(("Login: "))
                 #checa se o login existe
                 senha = input(("Senha: "))
@@ -79,53 +84,57 @@ def main():
                 data_ingresso = input(("Data de ingresso: "))
                 id_instituicao = input(("Id da instituição: "))
                 insere_usuario(con, login_input, senha, email, data_ingresso, id_instituicao)
-                
+               
             else:
-                #checa se é adm
-                
-                role = role_check(con, login)
-                
-                if any('papelADM' in i[0] for i in role):
-                    login_input = input(("Login: "))
-                    #checa se o login existe
-                    senha = input(("Senha: "))
-                    #checa se a senha está correta
-                    email = input(("Email: "))
-                    data_ingresso = input(("Data de ingresso: "))
-                    id_instituicao = input(("Id da instituição: "))
-                    insere_usuario(con, login_input, senha, email, data_ingresso, id_instituicao)
-                else:
-                    #se ele nao for adm 
-                    print("")
-                    break
-                
+                #se ele não for root nem adm
+                print("Permissão negada para criar usuário.\n")
+                break
+               
         elif op == 2: # insere instituição
-            nome = input(("Nome: "))
-            endereco = input(("Endereço: "))
-            causa_social = input(("Causa social: "))
-            insere_instituicao(con, nome, endereco, causa_social)
-            print("Instituição adicionada com sucesso!\n")
-        
+            role = role_check(con, login)
+            if login == "root" or any('papelADM' in i[0] for i in role):
+                nome = input(("Nome: "))
+                endereco = input(("Endereço: "))
+                causa_social = input(("Causa social: "))
+                insere_instituicao(con, nome, endereco, causa_social)
+                print("Instituição adicionada com sucesso!\n")
+            else:
+                #se ele não for root nem adm
+                print("Permissão negada para criar instituição.\n")
+                break
+   
         elif op == 3: # cria arquivo
-            nome = input("Nome do arquivo: ")
-            tipo = input("Tipo (exemplo: .exe): ")
-            permissao_acesso = input("Permissão de acesso (público/privado): ")
-            id_usuario = input("Id do usuário: ")
-            url = input("URL: ")
-            adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url)
-        
+            role = role_check(con, login)
+            if login == "root" or any('papelADM' in i[0] for i in role):
+                nome = input("Nome do arquivo: ")
+                tipo = input("Tipo (exemplo: .exe): ")
+                permissao_acesso = input("Permissão de acesso (público/privado): ")
+                id_usuario = input("Id do usuário: ")
+                url = input("URL: ")
+                adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url)
+            else:
+                # se não for root nem adm
+                print("Permissão negada para criar instituição.\n")
+                break
+       
         elif op == 4: # fazer comentário
-            id_arquivo = input(("Id do arquivo: "))
-            conteudo = input(("Conteúdo do comentário: "))
-            fazerComentario(con, id_arquivo, conteudo, login)
-        
+            role = role_check(con, login)
+            if login == "root" or any('papelADM' in i[0] for i in role) or any('papelUsuario' in i[0] for i in role):
+                id_arquivo = input(("Id do arquivo: "))
+                conteudo = input(("Conteúdo do comentário: "))
+                fazerComentario(con, id_arquivo, conteudo, login)
+            else:
+                #se ele não for adm, nem root, nem usuário
+                print("Permissão negada para fazer comentário.\n")
+                break
+       
         elif op == 5: # criar plano
             nome = input(("Nome: "))
             duracao = input(("Duração (HH:MM:SS): "))
-            data_aquisicao = input(("Data de aquisição (AAAA-MM-DD): ")) 
+            data_aquisicao = input(("Data de aquisição (AAAA-MM-DD): "))
             espaco_usuario = input(("Espaço do usuário: "))
             insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario)
-
+ 
         elif op == 6: # compartilhar arquivo
             id_arquivo = input("Id do arquivo: ")
             # id_dono = input(("Id do dono: "))
@@ -135,7 +144,7 @@ def main():
             login_compartilhado = input(("Login do compartilhado: "))
             id_compartilhado = get_id(con, login_compartilhado)
             compartilhar(con, id_arquivo, id_dono, id_compartilhado)
-
+ 
         elif op == 7: # acessar arquivo específico
             nome_arquivo = input(("Nome do arquivo: "))
             acessar_arquivo(con, nome_arquivo)
@@ -143,11 +152,11 @@ def main():
             id_arquivo = input(("Sobre que arquivo você deseja pedir o supórte (id)? " ))
             mensagem = input(("Descrição do suporte: "))
             pedir_suporte(con, id_arquivo, mensagem, login)
-
+ 
         elif op == 9:  # remover arquivo
             id_arquivo = input("Id do arquivo a ser deletado: ")
             remover_arquivo(con, id_arquivo)
-
+ 
         elif op == 10: # verificar 100 dias
             if login == "root" :
                 id_arquivo = input("Id do arquivo a ser checado: ")
@@ -157,7 +166,7 @@ def main():
                     print("Arquivo modificado há menos de 100 dias.\n")
             else:
                 role = role_check(con, login)
-                
+               
                 if any('papelADM' in i[0] for i in role):
                     id_arquivo = input("Id do arquivo a ser checado: ")
                     if verificacaoDe100Dias(con,id_arquivo):
@@ -166,14 +175,15 @@ def main():
                         print("Arquivo modificado há menos de 100 dias.\n")
                 else:
                     print("Erro: acesso negado!\n")
-
+ 
         elif op == 11: # visualizar atividades recentes
             visualizar_atividades_R (con,login)
-
+ 
         elif op == 12: # visualizar histórico de versionamento
             print("fazer")
             acessar_historico_operacoes(con)
             #terminar a logica ainda
+ 
         elif op == 13:
             #veifica qual o role do usuario atual
             role = role_check(con,login)
@@ -193,12 +203,26 @@ def main():
                 #views usuario
                 id = get_id(con, login)
                 acessar_arquivos_usuario(con,id)
-
+ 
+        elif op == 14: # Atualizar atividades recentes com a data atual
+            verificar_atividades(con)
+ 
+        elif op == 15: # Total de usuários com acesso a um arquivo
+            id_arquivo = input(("Id do arquivo: "))
+            conta_usuarios(con, id_arquivo)
+ 
+        elif op == 16: # Trocar acesso não prioritário para prioritário de um arquivo
+            id_arquivo = input(("Id do arquivo: "))
+            chavear(con, id_arquivo)
+ 
+        elif op == 17: # Remover acessos de arquivo
+            id_arquivo = input(("Id do arquivo: "))
+            remover_acessos(con, id_arquivo)
+ 
+ 
     print("Saindo do programa...")
     fechar_conexao(con)
-
-
+ 
+ 
 if __name__ == "__main__":
     main()
-
-
