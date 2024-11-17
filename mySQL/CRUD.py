@@ -28,12 +28,20 @@ def check_login(con, login, senha):
 
 def insere_instituicao(con, nome, endereco, causa_social): # insere uma instituição
     cursor = con.cursor()
-    sql = "INSERT INTO instituicao (nome, endereco, causa_social) values (%s, %s, %s)"
-    valores = (nome, endereco, causa_social)
-    cursor.execute(sql, valores)
-    cursor.close()
-    con.commit() # dando commit pois foi feita uma alteração no banco de dados
-
+    try:
+        sql = "INSERT INTO instituicao (nome, endereco, causa_social) values (%s, %s, %s)"
+        valores = (nome, endereco, causa_social)
+        cursor.execute(sql, valores)
+        cursor.close()
+        con.commit() # dando commit pois foi feita uma alteração no banco de dados
+        print(f"Instituição {nome} criada no MySQL e inserida na tabela insituição.\n")
+ 
+    except mysql.connector.Error as e:
+        print(f"Erro ao criar insituição no MySQL: {e}\n")
+        con.rollback()  
+ 
+    finally:
+        cursor.close()
 
 
 def insere_usuario(con, login, senha, email, data_ingresso, id_instituicao): 
