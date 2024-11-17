@@ -249,29 +249,38 @@ def adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url):
     finally:
         cursor.close()
 
-def acessar_arquivo(con,nome_arquivo):
+def acessar_arquivo(con, nome_arquivo):
     cursor = con.cursor()
     try:
+        
+        cursor.execute('''SELECT id, permissao_acesso FROM arquivo WHERE nome = %s''', (nome_arquivo,))
+        id_arquivo = cursor.fetchone()
+
+        if id_arquivo is None:
+            print(f"Arquivo '{nome_arquivo}' não encontrado.")
+            return
+
+       
+        id, permissao_acesso = id_arquivo
 
         
-        #pega o id do arquivo e procura ele pelo nome do arquivo
-        cursor.execute('''SELECT id, permissao_acesso FROM arquivo WHERE nome = %s 
-                       ''',(nome_arquivo,))
+        if permissao_acesso in ("publi", "publi/compa", "priv/compa"):
+           
+            cursor.execute('''SELECT nome, tipo, url, id_usuario FROM arquivo WHERE id = %s''', (id,))
+            arquivo_info = cursor.fetchone()
 
-        id_arquivo = cursor.fetchone()
-        acessar_arquivos_usuario(con,id_arquivo)
-        #pega a permissao de acesso
-        permissao_acesso = cursor.fetchone(1)
-        #faz o check se o usuario tem acesso
-        if permissao_acesso == "público" or permissao_acesso == "público/compartilhado" or permissao_acesso == "privado/compartilhado": 
-            #usando o id_arquivo faz os select necessarios
-            cursor.execute(''' SELECT nome, tipo, url, id_usuario FROM arquivo WHERE id = %s'''(id_arquivo,))
-
-        else :
-            print(f"Usuario não tem acesso a arquivo {id_arquivo}")
+            if arquivo_info:
+                print("Informações do arquivo:")
+                print(f"Nome: {arquivo_info[0]}")
+                print(f"Tipo: {arquivo_info[1]}")
+                print(f"URL: {arquivo_info[2]}")
+                print(f"ID do Usuário: {arquivo_info[3]}")
+            else:
+                print(f"Arquivo com ID {id} não encontrado.")
+        else:
+            print(f"Usuário não tem acesso ao arquivo '{nome_arquivo}'.")
     except mysql.connector.Error as e:
-        print(f"Erro ao procurar arquivo : {e}")
-
+        print(f"Erro ao procurar arquivo: {e}")
     finally:
         cursor.close()
 
