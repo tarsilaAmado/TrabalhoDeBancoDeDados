@@ -90,16 +90,17 @@ def main():
                 print("Permissão negada para criar usuário.\n")
                 break
                
-        elif op == 2: # insere instituição
+       elif op == 2: # insere instituição
             role = role_check(con, login)
             if login == "root" or any('papelADM' in i[0] for i in role):
                 nome = input(("Nome: "))
                 endereco = input(("Endereço: "))
                 causa_social = input(("Causa social: "))
-                insere_instituicao(con, nome, endereco, causa_social)
+                plano = input("Id do plano: ")
+                insere_instituicao(con, nome, endereco, causa_social,plano)
                 print("Instituição adicionada com sucesso!\n")
             else:
-                #se ele não for root nem adm
+                #se ele não for root nem adm 
                 print("Permissão negada para criar instituição.\n")
                 break
    
