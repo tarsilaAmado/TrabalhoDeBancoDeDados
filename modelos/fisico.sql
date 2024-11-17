@@ -206,21 +206,6 @@ BEGIN
 END
 //
  
-CREATE TRIGGER Registrar_operacao
-AFTER INSERT ON arquivo
-FOR EACH ROW
-BEGIN
-    IF EXISTS (SELECT 1 FROM atividades_recentes WHERE id_arquivo = NEW.id) THEN
-        UPDATE atividades_recentes 
-        SET ultima_versao = CURDATE()
-        WHERE id_arquivo = NEW.id;
-    ELSE
-        INSERT INTO atividades_recentes (id_arquivo, ultima_versao, acesso)
-        VALUES (NEW.id, CURDATE(), 'default');
-    END IF;
-END;
-//
- 
 CREATE TRIGGER atualizar_acesso
 AFTER INSERT ON compartilhamento
 FOR EACH ROW
@@ -250,10 +235,7 @@ DELIMITER ;
 CREATE ROLE 'papelADM';
 CREATE ROLE 'papelEmpresa';
 CREATE ROLE 'papelUsuario';
-GRANT SELECT, INSERT, UPDATE ON webdriver.* TO papelUsuario;
-GRANT SELECT, INSERT, UPDATE ON mysql.* TO papelUsuario;
-GRANT SELECT ON webdriver.* TO papelEmpresa;
-GRANT SELECT ON mysql.* TO papelEmpresa;
-GRANT SELECT, INSERT, UPDATE, DELETE ON webdriver.* TO papelADM;
-GRANT SELECT, INSERT, UPDATE, DELETE ON mysql.* TO papelADM;
+GRANT SELECT, INSERT, UPDATE ON *.* TO papelUsuario;
+GRANT SELECT ON *.* TO papelEmpresa;
+GRANT SELECT, INSERT, UPDATE, DELETE ON *.* TO papelADM;
 GRANT CREATE USER ON *.* TO papelADM;
