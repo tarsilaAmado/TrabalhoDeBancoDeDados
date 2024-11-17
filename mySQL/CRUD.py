@@ -26,14 +26,16 @@ def check_login(con, login, senha):
 
 
 
-def insere_instituicao(con, nome, endereco, causa_social): # insere uma instituição
+def insere_instituicao(con, nome, endereco, causa_social,plano): # insere uma instituição
     cursor = con.cursor()
     try:
-        sql = "INSERT INTO instituicao (nome, endereco, causa_social) values (%s, %s, %s)"
-        valores = (nome, endereco, causa_social)
+        cursor = con.cursor()
+        sql = "INSERT INTO instituicao (nome, endereco, causa_social,plano) values (%s, %s, %s,%s)"
+        valores = (nome, endereco, causa_social,plano)
         cursor.execute(sql, valores)
         cursor.close()
         con.commit() # dando commit pois foi feita uma alteração no banco de dados
+
         print(f"Instituição {nome} criada no MySQL e inserida na tabela insituição.\n")
  
     except mysql.connector.Error as e:
