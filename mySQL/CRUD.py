@@ -126,17 +126,6 @@ def inserir_adm(con, login):
     finally:
         cursor.close()
 
-def select_todos_usuarios(con): # irá mostrar todos os usuários já inseridos
-    cursor = con.cursor()
-    sql = "SELECT login, email, data_ingresso, id_instituicao FROM usuario" # não vai exibir a senha. escolha não inteligente.
-    cursor.execute(sql)
-
-    for (login, email, data_ingresso, id_instituicao) in cursor:
-        print(login, email, data_ingresso, id_instituicao)
-
-    cursor.close()
-    # não precisa dar commit porque não fez nenhuma alteração no banco de dados
-
 def fazerComentario(con, id_arquivo, conteudo, login):
     cursor = con.cursor(buffered=True)
     try:
