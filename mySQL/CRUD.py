@@ -3,7 +3,8 @@ from mysql.connector import Error
 from conexao import *
 from datetime import datetime
 from views import *
-from roles import *
+from roles import atribuir_role
+
 
 def check_login(con, login, senha): 
     cursor = con.cursor(buffered=True)  # Adiciona buffered=True (limpa o buffer do cursor)
@@ -52,7 +53,10 @@ def insere_usuario(con, login, senha, email, data_ingresso, id_instituicao):
         
         create_user_sql = "CREATE USER %s@'localhost' IDENTIFIED BY %s;"
         cursor.execute(create_user_sql, (login, senha,))
-        
+        alter_user_sql = '''ALTER USER %s@'localhost' IDENTIFIED WITH mysql_native_password BY %s;'''
+        cursor.execute(alter_user_sql, (login, senha,))
+        cursor.execute("FLUSH PRIVILEGES;")
+            
         
         sql = "INSERT INTO usuario (login, senha, email, data_ingresso, id_instituicao) VALUES (%s, %s, %s, %s, %s)"
         valores = (login, senha, email, data_ingresso, id_instituicao)
@@ -66,11 +70,7 @@ def insere_usuario(con, login, senha, email, data_ingresso, id_instituicao):
         print("2 - EMpresa")
         print("3 - ADM")
         escolha = input()
-        debug = atribuir_role(con,login,escolha)
-        #debug
-        
-        
-        #fim do debug
+        atribuir_role(con,login,escolha)
         print("Usuário adicionado com sucesso!")
 
         
@@ -98,35 +98,7 @@ def insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario): # insere u
     finally:
         cursor.close()
 
-def inserir_adm(con, login):
-    cursor = con.cursor()
-    try:
-        cursor.execute("SELECT id FROM usuario WHERE login = %s", (login,))  # busca o id do usuário com base no login
-        resultado = cursor.fetchone()
-        
-        if resultado:
-            id_usuario = resultado[0]
-            cursor.execute("INSERT INTO adm (id) VALUES (%s)", (id_usuario,))  # insere o id do usuário na tabela adm
-            con.commit()
 
-            # Obtém o id do novo administrador inserido
-            cursor.execute("SELECT id FROM adm WHERE id = %s", (id_usuario,))
-            id_adm = cursor.fetchone()[0]
-
-            # Insere na tabela usuario_adm
-            cursor.execute(
-                "INSERT INTO usuario_adm (id_usuario, id_adm) VALUES (%s, %s)",
-                (id_usuario, id_adm)
-            )
-            con.commit()
-            print("Administrador inserido com sucesso e vinculado ao usuário.")
-        else:
-            print("Erro: usuário com o login especificado não encontrado.")
-            
-    except mysql.connector.Error as e:
-        print(f"Erro ao inserir administrador: {e}")
-    finally:
-        cursor.close()
 
 def fazerComentario(con, id_arquivo, conteudo, login):
     cursor = con.cursor(buffered=True)
@@ -401,5 +373,3 @@ def role_check(con, login):
 
     finally:
         cursor.close()
-        
-        
