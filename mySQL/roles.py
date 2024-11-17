@@ -1,6 +1,7 @@
 import mysql.connector
 from mysql.connector import Error
 from conexao import *
+from CRUD import *
 
 
 def atribuir_role(con, login, escolha):
@@ -12,14 +13,17 @@ def atribuir_role(con, login, escolha):
             cursor.execute(f"GRANT 'papelUsuario' TO '{login}'@'localhost'")
             con.commit()
 
+
         elif escolha == "2":
             
             cursor.execute(f"GRANT 'papelEmpresa' TO '{login}'@'localhost'")
             con.commit()
+        
         elif escolha == "3":
             
             cursor.execute(f"GRANT 'papelADM' TO '{login}'@'localhost'")
             con.commit()
+            inserir_adm(con, login)
         else:
             print("Opção de role inválida.")
             return None
