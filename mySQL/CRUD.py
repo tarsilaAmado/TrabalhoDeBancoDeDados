@@ -201,26 +201,26 @@ def pedir_suporte(con, id_arquivo, mensagem, login):
 def remover_arquivo(con, id_arquivo):
     cursor = con.cursor()
     try:
-        sql = '''
-        SELECT id FROM arquivo WHERE id = %s
-    '''
-        cursor.execute(sql,(id_arquivo,))
-        valor = cursor.fetchone()
+        # Desabilita temporariamente as verificações de chaves estrangeiras
+        cursor.execute('SET FOREIGN_KEY_CHECKS = 0')
 
-        if valor:
-            sql_deletar = '''
-            DELETE FROM arquivo WHERE id = %s 
-        '''
-            cursor.execute(sql_deletar, (id_arquivo,))
-            con.commit()
-            print("Arquivo removido com sucesso!")
-        else:
-            print("Arquivo não econtrado")
-    
+        
+        cursor.execute('DELETE FROM arquivo WHERE id = %s', (id_arquivo,))
+        
+        # Commit das alterações no banco
+        con.commit()
+        print("Arquivo e dependências removidos com sucesso!")
+
     except mysql.connector.Error as e:
         print(f"Erro ao remover o arquivo: {e}")
     finally:
+        # Reabilita as verificações de chaves estrangeiras
+        cursor.execute('SET FOREIGN_KEY_CHECKS = 1')
         cursor.close()
+
+# Exemplo de uso
+# Supondo que você tenha uma conexão com o banco de dados chamada 'con'
+# remover_arquivo_forcado(con, 1)  # Onde '1' é o ID do arquivo a ser removido
 
 def adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url):
     cursor = con.cursor()
