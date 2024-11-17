@@ -7,7 +7,7 @@ def criar_conexao (host, usuario, senha, banco):
     try:
         return mysql.connector.connect(host = host, user = usuario, password = senha, database = banco)
     except mysql.connector.Error as e:
-        print(f"Erro ao atribuir role : {e}")
+        print(f"Erro ao conectar : {e}")
         return None
 
 def fechar_conexao (con):

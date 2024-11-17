@@ -107,8 +107,8 @@ def main():
             role = role_check(con, login)
             if login == "root" or any('papelADM' in i[0] for i in role):
                 nome = input("Nome do arquivo: ")
-                tipo = input("Tipo (exemplo: .exe): ")
-                permissao_acesso = input("Permissão de acesso (público/privado): ")
+                tipo = input("Tipo (.exe não pode): ")
+                permissao_acesso = input("Permissão de acesso (publi/priv): ")
                 id_usuario = input("Id do usuário: ")
                 url = input("URL: ")
                 adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url)

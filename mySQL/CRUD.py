@@ -31,7 +31,7 @@ def insere_instituicao(con, nome, endereco, causa_social,plano): # insere uma in
     cursor = con.cursor()
     try:
         cursor = con.cursor()
-        sql = "INSERT INTO instituicao (nome, endereco, causa_social,plano) values (%s, %s, %s,%s)"
+        sql = "INSERT INTO instituicao (nome, endereco, causa_social,id_plano) values (%s, %s, %s,%s)"
         valores = (nome, endereco, causa_social,plano)
         cursor.execute(sql, valores)
         cursor.close()
@@ -258,12 +258,16 @@ def acessar_arquivo(con,nome_arquivo):
         cursor.execute('''SELECT id, permissao_acesso FROM arquivo WHERE nome = %s 
                        ''',(nome_arquivo,))
 
-        id_arquivo = cursor.fetchone()
-        acessar_arquivos_usuario(con,id_arquivo)
+        resultado = cursor.fetchall()
+        print(resultado)
+        id_arquivo, permissao_acesso = resultado[0]
+        print(id_arquivo)
+        print(permissao_acesso)
         #pega a permissao de acesso
-        permissao_acesso = cursor.fetchone(1)
+        
+        acessar_arquivos_usuario(con,id_arquivo)
         #faz o check se o usuario tem acesso
-        if permissao_acesso == "público" or permissao_acesso == "público/compartilhado" or permissao_acesso == "privado/compartilhado": 
+        if permissao_acesso != "priv": 
             #usando o id_arquivo faz os select necessarios
             cursor.execute(''' SELECT nome, tipo, url, id_usuario FROM arquivo WHERE id = %s'''(id_arquivo,))
 
