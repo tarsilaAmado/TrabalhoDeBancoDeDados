@@ -123,7 +123,8 @@ def main():
             if login == "root" or any('papelADM' in i[0] for i in role) or any('papelUsuario' in i[0] for i in role):
                 id_arquivo = input(("Id do arquivo: "))
                 conteudo = input(("Conteúdo do comentário: "))
-                fazerComentario(con, id_arquivo, conteudo, login)
+                id_usuario = input(("Id do usuário que está comentando: "))
+                fazerComentario(con, id_arquivo, conteudo, id_usuario)
             else:
                 #se ele não for adm, nem root, nem usuário
                 print("Permissão negada para fazer comentário.\n")
@@ -144,7 +145,7 @@ def main():
             #vai pegar o id do compartilhado
             login_compartilhado = input(("Login do compartilhado: "))
             id_compartilhado = get_id(con, login_compartilhado)
-            compartilhar(con, id_arquivo, id_dono, id_compartilhado)
+            compartilhar(con, id_arquivo, id_dono, id_compartilhado,login)
 
         elif op == 7: # acessar arquivo específico
             nome_arquivo = input(("Nome do arquivo: "))
@@ -181,7 +182,6 @@ def main():
             visualizar_atividades_R (con,login)
 
         elif op == 12: # visualizar histórico de versionamento
-            
             acessar_historico_operacoes(con)
             #terminar a logica ainda
 
@@ -219,7 +219,7 @@ def main():
         elif op == 17: # Remover acessos de arquivo
             id_arquivo = input(("Id do arquivo: "))
             remover_acessos(con, id_arquivo)
-         elif op ==18:
+        elif op ==18:
             id_arquivo=input(("Id arquivo: "))
             nova_url=input(("qual a nova url: "))
             alterar_url_arquivo(con,id_arquivo,nova_url)
