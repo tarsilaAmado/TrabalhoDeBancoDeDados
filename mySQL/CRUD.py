@@ -453,6 +453,26 @@ def alterar_url_arquivo(con, id_arquivo, nova_url):
     finally:
         cursor.close()
 
+def alterar_tipo_arquivo(con, id_arquivo, novo_tipo):
+    cursor = con.cursor()
+    try:
+        # Verifica se o arquivo existe
+        cursor.execute('SELECT id FROM arquivo WHERE id = %s', (id_arquivo,))
+        valor = cursor.fetchone()
+
+        if valor:
+            # Atualiza a URL do arquivo
+            cursor.execute('UPDATE arquivo SET tipo = %s WHERE id = %s', (novo_tipo, id_arquivo))
+            con.commit()
+            print("Tipo do arquivo atualizada com sucesso!")
+        else:
+            print("Arquivo não encontrado")
+    
+    except mysql.connector.Error as e:
+        print(f"Erro ao alterar o tipo do arquivo: {e}")
+    finally:
+        cursor.close()
+
 def get_id(con, login):
     cursor = con.cursor()
     cursor.execute("SELECT id FROM usuario WHERE login = %s", (login,)) # busca o id do usuário com base no login
