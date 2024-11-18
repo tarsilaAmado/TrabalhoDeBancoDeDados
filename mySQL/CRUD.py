@@ -394,6 +394,26 @@ def visualizar_atividades_R(con, login):
         print("Erro: acesso negado!\n")
 
 
+def alterar_url_arquivo(con, id_arquivo, nova_url):
+    cursor = con.cursor()
+    try:
+        # Verifica se o arquivo existe
+        cursor.execute('SELECT id FROM arquivo WHERE id = %s', (id_arquivo,))
+        valor = cursor.fetchone()
+
+        if valor:
+            # Atualiza a URL do arquivo
+            cursor.execute('UPDATE arquivo SET URL = %s WHERE id = %s', (nova_url, id_arquivo))
+            con.commit()
+            print("URL do arquivo atualizada com sucesso!")
+        else:
+            print("Arquivo não encontrado")
+    
+    except mysql.connector.Error as e:
+        print(f"Erro ao alterar a URL do arquivo: {e}")
+    finally:
+        cursor.close()
+
 def get_id(con, login):
     cursor = con.cursor()
     cursor.execute("SELECT id FROM usuario WHERE login = %s", (login,)) # busca o id do usuário com base no login
