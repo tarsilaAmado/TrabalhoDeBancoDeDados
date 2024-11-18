@@ -214,18 +214,34 @@ def pedir_suporte(con, id_arquivo, mensagem, login):
 
 import mysql.connector
 
-def remover_arquivo(con, id_arquivo):
+def remover_arquivo(con, id_arquivo,login):
     cursor = con.cursor()
-    try:
-        # Desabilita temporariamente as verificações de chaves estrangeiras
-        cursor.execute('SET FOREIGN_KEY_CHECKS = 0')
 
-        
-        cursor.execute('DELETE FROM arquivo WHERE id = %s', (id_arquivo,))
-        
-        # Commit das alterações no banco
-        con.commit()
-        print("Arquivo e dependências removidos com sucesso!")
+    role = role_check(con,login)
+    if any('papelEmpresa' in i[0] for i in role):
+        print("Empresa com permissão negada para compartilhamento.\n")
+        return
+
+    try:
+
+        cursor.execute(''' SELECT id_usuario FROM arquivo WHERE id = %s ''',(id_arquivo,))
+        id_usuario = cursor.fetchone()
+        cursor.execute('''SELECT id FROM usuario WHERE login = %s''',(login,))
+        id_login_usuario = cursor.fetchone()
+
+        if id_usuario != id_login_usuario:
+            print("Permissão negada. Apenas o dono pode remover o arquivo.\n")
+        else:
+            # Desabilita temporariamente as verificações de chaves estrangeiras
+            cursor.execute('SET FOREIGN_KEY_CHECKS = 0')
+
+            
+            cursor.execute('DELETE FROM arquivo WHERE id = %s', (id_arquivo,))
+            cursor.execute('DELETE FROM comentario WHERE %s', (id_arquivo,))
+            
+            # Commit das alterações no banco
+            con.commit()
+            print("Arquivo e dependências removidos com sucesso!")
 
     except mysql.connector.Error as e:
         print(f"Erro ao remover o arquivo: {e}")
@@ -233,6 +249,8 @@ def remover_arquivo(con, id_arquivo):
         # Reabilita as verificações de chaves estrangeiras
         cursor.execute('SET FOREIGN_KEY_CHECKS = 1')
         cursor.close()
+
+
 
 # Exemplo de uso
 # Supondo que você tenha uma conexão com o banco de dados chamada 'con'
