@@ -53,11 +53,14 @@ def acessar_arquivos_usuario(con, id):
     finally:
         cursor.close()
 
+
 def acessar_arquivos_instituicao(con, id):
     cursor = con.cursor()
 
     try:
         if idCheck_instituicao(con, id):
+
+            cursor.execute('DROP VIEW IF EXISTS view_instituicao;')
 
             cursor.execute(''' 
             CREATE VIEW IF NOT EXISTS view_instituicao AS
@@ -75,6 +78,7 @@ def acessar_arquivos_instituicao(con, id):
         print(f"Erro ao acessar os arquivos : {e}")
     finally:
         cursor.close()
+
 
 def acessar_arquivos_ADM(con, id):
     cursor = con.cursor()
