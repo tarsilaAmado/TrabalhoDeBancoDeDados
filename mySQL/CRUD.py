@@ -105,6 +105,7 @@ def insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario): # insere u
         cursor.close()
 
 
+
 def fazerComentario(con, id_arquivo, conteudo, id_usuario):
     cursor = con.cursor(buffered=True)
 
@@ -212,7 +213,6 @@ def pedir_suporte(con, id_arquivo, mensagem, login):
     finally:
         cursor.close()
 
-import mysql.connector
 
 def remover_arquivo(con, id_arquivo,login):
     cursor = con.cursor()
@@ -249,8 +249,6 @@ def remover_arquivo(con, id_arquivo,login):
         # Reabilita as verificações de chaves estrangeiras
         cursor.execute('SET FOREIGN_KEY_CHECKS = 1')
         cursor.close()
-
-
 
 # Exemplo de uso
 # Supondo que você tenha uma conexão com o banco de dados chamada 'con'
@@ -319,9 +317,6 @@ def acessar_arquivo(con, nome_arquivo):
     finally:
         cursor.close()
 
-
-
-from datetime import datetime, date
 
 def verificacaoDe100Dias(con, id_arquivo):
     cursor = con.cursor()
@@ -410,6 +405,7 @@ def compartilhar(con, id_arquivo, id_usuario_dono, id_usuario_compartilhado,logi
     finally:
         cursor.close()
 
+
 def visualizar_atividades_R(con, login):
     cursor = con.cursor()
     
@@ -433,40 +429,59 @@ def visualizar_atividades_R(con, login):
         print("Erro: acesso negado!\n")
 
 
-def alterar_url_arquivo(con, id_arquivo, nova_url):
+def alterar_url_arquivo(con, id_arquivo, nova_url,login):
     cursor = con.cursor()
     try:
-        # Verifica se o arquivo existe
-        cursor.execute('SELECT id FROM arquivo WHERE id = %s', (id_arquivo,))
-        valor = cursor.fetchone()
 
-        if valor:
-            # Atualiza a URL do arquivo
-            cursor.execute('UPDATE arquivo SET URL = %s WHERE id = %s', (nova_url, id_arquivo))
-            con.commit()
-            print("URL do arquivo atualizada com sucesso!")
+        cursor.execute(''' SELECT id_usuario FROM arquivo WHERE id = %s ''',(id_arquivo,))
+        id_usuario = cursor.fetchone()
+        cursor.execute('''SELECT id FROM usuario WHERE login = %s''',(login,))
+        id_login_usuario = cursor.fetchone()
+
+        if id_usuario != id_login_usuario:
+            print("Permissão negada. Apenas o dono pode alterar o arquivo.\n")
         else:
-            print("Arquivo não encontrado")
+            # Verifica se o arquivo existe
+            cursor.execute('SELECT id FROM arquivo WHERE id = %s', (id_arquivo,))
+            valor = cursor.fetchone()
+
+            if valor:
+                # Atualiza a URL do arquivo
+                cursor.execute('UPDATE arquivo SET URL = %s WHERE id = %s', (nova_url, id_arquivo))
+                con.commit()
+                print("URL do arquivo atualizada com sucesso!")
+            else:
+                print("Arquivo não encontrado")
     
     except mysql.connector.Error as e:
         print(f"Erro ao alterar a URL do arquivo: {e}")
     finally:
         cursor.close()
 
-def alterar_tipo_arquivo(con, id_arquivo, novo_tipo):
+
+def alterar_tipo_arquivo(con, id_arquivo, novo_tipo,login):
     cursor = con.cursor()
     try:
-        # Verifica se o arquivo existe
-        cursor.execute('SELECT id FROM arquivo WHERE id = %s', (id_arquivo,))
-        valor = cursor.fetchone()
 
-        if valor:
-            # Atualiza a URL do arquivo
-            cursor.execute('UPDATE arquivo SET tipo = %s WHERE id = %s', (novo_tipo, id_arquivo))
-            con.commit()
-            print("Tipo do arquivo atualizada com sucesso!")
+        cursor.execute(''' SELECT id_usuario FROM arquivo WHERE id = %s ''',(id_arquivo,))
+        id_usuario = cursor.fetchone()
+        cursor.execute('''SELECT id FROM usuario WHERE login = %s''',(login,))
+        id_login_usuario = cursor.fetchone()
+
+        if id_usuario != id_login_usuario:
+            print("Permissão negada. Apenas o dono pode alterar o arquivo.\n")
         else:
-            print("Arquivo não encontrado")
+            # Verifica se o arquivo existe
+            cursor.execute('SELECT id FROM arquivo WHERE id = %s', (id_arquivo,))
+            valor = cursor.fetchone()
+
+            if valor:
+                # Atualiza a URL do arquivo
+                cursor.execute('UPDATE arquivo SET tipo = %s WHERE id = %s', (novo_tipo, id_arquivo))
+                con.commit()
+                print("Tipo do arquivo atualizada com sucesso!")
+            else:
+                print("Arquivo não encontrado")
     
     except mysql.connector.Error as e:
         print(f"Erro ao alterar o tipo do arquivo: {e}")
