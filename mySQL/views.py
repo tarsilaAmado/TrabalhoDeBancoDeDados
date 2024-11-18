@@ -78,28 +78,23 @@ def acessar_arquivos_instituicao(con, id):
 def acessar_arquivos_ADM(con, id):
     cursor = con.cursor()
     try:
-        if(idCheck(con, id)):
-
-            cursor.execute('''  
-                CREATE VIEW IF NOT EXISTS  view_adm as
+        if idCheck(con, id):
+            cursor.execute('DROP VIEW IF EXISTS view_adm')
+            cursor.execute('''
+                CREATE VIEW view_adm AS
                 SELECT * 
                 FROM arquivo
-
-
-                ''')
-            
-            cursor.execute(''' SELECT * FROM view_adm ''')
-           
+            ''')
+            cursor.execute('SELECT * FROM view_adm')
             view_adm = cursor.fetchall()
-            
             for row in view_adm:
                 print(row)
         else:
             print(f"ID {id} não é ADM!!")
     except mysql.connector.Error as err:
-        print(f"Erro ao acessar arquivos do usuário: {err}")    
+        print(f"Erro ao acessar arquivos do usuário: {err}")
     finally:
-        cursor.close()    
+        cursor.close()
 
 def acessar_historico_operacoes(con):
     cursor = con.cursor()
