@@ -23,6 +23,7 @@ def menu():
     print("15 - Total de usuários com acesso a um arquivo")
     print("16 - Trocar acesso não prioritário para prioritário de um arquivo")
     print("17 - Remover acessos de arquivo")
+    print("18 -alterar url de um arquivo")
     print("0 - Sair")
     
 def main():
@@ -218,7 +219,10 @@ def main():
         elif op == 17: # Remover acessos de arquivo
             id_arquivo = input(("Id do arquivo: "))
             remover_acessos(con, id_arquivo)
-
+         elif op ==18:
+            id_arquivo=input(("Id arquivo: "))
+            nova_url=input(("qual a nova url: "))
+            alterar_url_arquivo(con,id_arquivo,nova_url)
 
     print("Saindo do programa...")
     fechar_conexao(con)
