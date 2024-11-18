@@ -86,8 +86,8 @@ def insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario): # insere u
     cursor = con.cursor()
 
     role = role_check(con,login)
-    if any('papelEmpresa' in i[0] for i in role):
-        print("Empresa com permissão negada para compartilhamento.\n")
+    if (any('papelEmpresa' in i[0] for i in role) or any('papelUsuario' in i[0] for i in role)):
+        print("Permissão negada para compartilhamento.\n")
         return
 
     try:
@@ -103,7 +103,6 @@ def insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario): # insere u
         con.rollback()  
     finally:
         cursor.close()
-
 
 
 def fazerComentario(con, id_arquivo, conteudo, id_usuario):
