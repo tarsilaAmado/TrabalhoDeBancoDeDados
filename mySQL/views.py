@@ -29,17 +29,20 @@ def acessar_arquivos_usuario(con, id):
     try:
         cursor.execute('DROP VIEW IF EXISTS view_usuario;')
 
-        # Criando a view, se ela não existir
+        # Criando a view com a coluna id_compartilhado incluída
         cursor.execute('''
-            CREATE VIEW IF NOT EXISTS view_usuario AS
-            SELECT nome, tipo, permissao_acesso 
+            CREATE VIEW view_usuario AS
+            SELECT 
+                arquivo.nome AS Nome, 
+                arquivo.tipo AS Tipo, 
+                arquivo.permissao_acesso AS PermissaoAcesso,
+                compartilhamento.id_compartilhado AS IdCompartilhado
             FROM arquivo
-            JOIN compartilhamento ON arquivo.id = compartilhamento.id_arquivo
-            
+            JOIN compartilhamento ON arquivo.id = compartilhamento.id_arquivo;
         ''')
         
         # Consultando a view para obter os dados
-        cursor.execute('SELECT * FROM view_usuario WHERE compartilhamento.id_compartilhado = %s', (id,))
+        cursor.execute('SELECT Nome, Tipo, PermissaoAcesso FROM view_usuario WHERE IdCompartilhado = %s', (id,))
         view_usuario = cursor.fetchall()
         
         # Exibindo os resultados
@@ -53,7 +56,6 @@ def acessar_arquivos_usuario(con, id):
     finally:
         cursor.close()
 
-
 def acessar_arquivos_instituicao(con, id):
     cursor = con.cursor()
 
@@ -63,7 +65,7 @@ def acessar_arquivos_instituicao(con, id):
             cursor.execute('DROP VIEW IF EXISTS view_instituicao;')
 
             cursor.execute(''' 
-            CREATE VIEW IF NOT EXISTS view_instituicao AS
+            CREATE VIEW view_instituicao AS
             SELECT *
             FROM arquivo
             JOIN usuario ON arquivo.id_usuario = usuario.id
@@ -80,26 +82,6 @@ def acessar_arquivos_instituicao(con, id):
         cursor.close()
 
 
-def acessar_arquivos_ADM(con, id):
-    cursor = con.cursor()
-    try:
-        if idCheck(con, id):
-            cursor.execute('DROP VIEW IF EXISTS view_adm')
-            cursor.execute('''
-                CREATE VIEW view_adm AS
-                SELECT * 
-                FROM arquivo
-            ''')
-            cursor.execute('SELECT * FROM view_adm')
-            view_adm = cursor.fetchall()
-            for row in view_adm:
-                print(row)
-        else:
-            print(f"ID {id} não é ADM!!")
-    except mysql.connector.Error as err:
-        print(f"Erro ao acessar arquivos do usuário: {err}")
-    finally:
-        cursor.close()
 
 def acessar_historico_operacoes(con):
     cursor = con.cursor()
