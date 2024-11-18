@@ -170,6 +170,12 @@ def remover_acesso(con,id_arquivo, id_compartilhamento):
         
 def pedir_suporte(con, id_arquivo, mensagem, login):
     cursor = con.cursor()
+
+    role = role_check(con,login)
+    if any('papelEmpresa' in i[0] for i in role):
+        print("Empresa com permissão negada para compartilhamento.\n")
+        return
+
     try:
         data_pedido = datetime.now().date() #pede data e hora atual
         hora_pedido = datetime.now().time()
