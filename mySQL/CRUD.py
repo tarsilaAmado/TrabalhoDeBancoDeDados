@@ -107,6 +107,12 @@ def insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario): # insere u
 
 def fazerComentario(con, id_arquivo, conteudo, id_usuario):
     cursor = con.cursor(buffered=True)
+
+    role = role_check(con,login)
+    if any('papelEmpresa' in i[0] for i in role):
+        print("Empresa com permissão negada para compartilhamento.\n")
+        return
+
     try:
         #obter data e hora
         data = datetime.now().date()
@@ -129,7 +135,7 @@ def fazerComentario(con, id_arquivo, conteudo, id_usuario):
         con.commit()
         print("Comentário feito!\n")
     except mysql.connector.Error as e:
-        print(f"Erro ao inserir comentario: {e}")
+        print(f"Erro ao inserir comentario : {e}")
     finally:
         cursor.close()
         #confirmar a insercao
