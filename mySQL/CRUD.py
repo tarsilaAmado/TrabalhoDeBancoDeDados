@@ -100,7 +100,7 @@ def insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario): # insere u
 
 
 
-def fazerComentario(con, id_arquivo, conteudo, login):
+def fazerComentario(con, id_arquivo, conteudo, id_usuario):
     cursor = con.cursor(buffered=True)
     try:
         #obter data e hora
@@ -116,18 +116,15 @@ def fazerComentario(con, id_arquivo, conteudo, login):
         con.commit()
         #obtem o id_comentario que é AUTO_INCREMENT
         id_comentario = cursor.lastrowid
-        #obtem o id_usuario
-        cursor.execute('''SELECT id FROM usuario WHERE login = %s ''', (login,))
-        id_usuario = cursor.fetchone()
         #insere id_usuario e d_comentario na tabela usuario_comentario
-        if id_usuario:
-            cursor.execute(''' 
-                INSERT INTO usuario_comentario (id_usuario, id_comentario)
-                VALUES (%s, %s)
-            ''', (id_usuario[0], id_comentario))
-            con.commit()
+        cursor.execute(''' 
+            INSERT INTO usuario_comentario (id_usuario, id_comentario)
+            VALUES (%s, %s)
+        ''', (id_usuario, id_comentario))
+        con.commit()
+        print("Comentário feito!\n")
     except mysql.connector.Error as e:
-        print(f"Erro ao inserir comentario : {e}")
+        print(f"Erro ao inserir comentario: {e}")
     finally:
         cursor.close()
         #confirmar a insercao
