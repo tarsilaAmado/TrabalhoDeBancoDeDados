@@ -328,8 +328,16 @@ def role_check(con, login):
 
     finally:
         cursor.close()
-def compartilhar(con, id_arquivo, id_usuario_dono, id_usuario_compartilhado):
+
+
+def compartilhar(con, id_arquivo, id_usuario_dono, id_usuario_compartilhado,login):
     cursor = con.cursor()
+
+    role = role_check(con,login)
+    if any('papelEmpresa' in i[0] for i in role):
+        print("Empresa com permissão negada para compartilhamento.\n")
+        return
+
     try:
         cursor.execute("SELECT id FROM arquivo WHERE id = %s AND id_usuario = %s", (id_arquivo, id_usuario_dono))
         arquivo_existe = cursor.fetchone()
@@ -359,14 +367,13 @@ def compartilhar(con, id_arquivo, id_usuario_dono, id_usuario_compartilhado):
             cursor.execute(sql,valoresIII)
             con.commit()
         else:
-            print(" Arquivo nao encontrado.")
+            print("Arquivo nao encontrado ou permissão negada (id não é o dono!\n)")
     
     except mysql.connector.Error as e:
         print(f"Erro ao compartilhar arquivo: {e}")
     
     finally:
         cursor.close()
-
 
 def visualizar_atividades_R(con, login):
     cursor = con.cursor()
