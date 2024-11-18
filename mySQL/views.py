@@ -104,9 +104,13 @@ def acessar_arquivos_ADM(con, id):
 def acessar_historico_operacoes(con):
     cursor = con.cursor()
     try:
+    
+        cursor.execute('DROP VIEW IF EXISTS view_historico_operacoes;')
+        
+    
         cursor.execute('''
-            CREATE VIEW IF NOT EXISTS view_historico_operacoes AS
-            SELECT 
+            CREATE VIEW view_historico_operacoes AS
+            SELECT
                 historico_operacoes.operacao AS Operacao,
                 usuario.login AS Usuario,
                 arquivo.nome AS Arquivo,
@@ -122,6 +126,8 @@ def acessar_historico_operacoes(con):
 
         cursor.execute('SELECT * FROM view_historico_operacoes')
         historico_operacoes = cursor.fetchall()
+
+        
         for row in historico_operacoes:
             print(row)
             
@@ -130,6 +136,7 @@ def acessar_historico_operacoes(con):
         
     finally:
         cursor.close()
+
 
 def acessar_arquivos_root(con, login):
     cursor = con.cursor()
