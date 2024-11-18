@@ -84,6 +84,12 @@ def insere_usuario(con, login, senha, email, data_ingresso, id_instituicao):
 
 def insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario): # insere um plano
     cursor = con.cursor()
+
+    role = role_check(con,login)
+    if any('papelEmpresa' in i[0] for i in role):
+        print("Empresa com permissão negada para compartilhamento.\n")
+        return
+
     try:
         sql = "INSERT INTO plano (nome, duracao, data_aquisicao, espaco_usuario) values (%s, %s, %s, %s)"
         valores = (nome, duracao, data_aquisicao, espaco_usuario)
