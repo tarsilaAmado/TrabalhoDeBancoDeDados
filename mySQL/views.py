@@ -23,14 +23,15 @@ def idCheck_instituicao(con, id):
     finally:
         cursor.close()
    
-
 def acessar_arquivos_usuario(con, id):
     cursor = con.cursor()
     
     try:
+        cursor.execute('DROP VIEW IF EXISTS view_usuario;')
+
         # Criando a view, se ela não existir
         cursor.execute('''
-            CREATE VIEW IF NOT EXISTS view_usuario AS 
+            CREATE VIEW IF NOT EXISTS view_usuario AS
             SELECT nome, tipo, permissao_acesso 
             FROM arquivo
             JOIN compartilhamento ON arquivo.id = compartilhamento.id_arquivo
