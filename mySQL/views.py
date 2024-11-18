@@ -83,15 +83,15 @@ def acessar_arquivos_ADM(con, id):
             cursor.execute('''  
                 CREATE VIEW IF NOT EXISTS  view_adm as
                 SELECT * 
-                FROM arquivos
+                FROM arquivo
 
 
                 ''')
-            cursor.commit()
-            view_adm = cursor.execute(''' SELECT * FROM view_adm ''')
-            cursor.commit()
             
-
+            cursor.execute(''' SELECT * FROM view_adm ''')
+           
+            view_adm = cursor.fetchall()
+            
             for row in view_adm:
                 print(row)
         else:

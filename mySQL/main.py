@@ -180,7 +180,7 @@ def main():
             visualizar_atividades_R (con,login)
 
         elif op == 12: # visualizar histórico de versionamento
-            print("fazer")
+            
             acessar_historico_operacoes(con)
             #terminar a logica ainda
 
