@@ -35,15 +35,24 @@ def conta_usuarios(conexao, id_arquivo):
 
 
 
-def chavear(conexao, id_arquivo):
+def chavear(conexao, id_arquivo,login):
     try:
         cursor = conexao.cursor()
         
-        # Chama a procedure
-        cursor.callproc('chavear_prioridade', (id_arquivo,))
-        
-        print(f"Prioridade do arquivo {id_arquivo} foi alternada com sucesso.\n")
-        conexao.commit()
+        cursor.execute(''' SELECT id_usuario FROM arquivo WHERE id = %s ''',(id_arquivo,))
+        id_usuario = cursor.fetchone()
+        cursor.execute('''SELECT id FROM usuario WHERE login = %s''',(login,))
+        id_login_usuario = cursor.fetchone()
+
+        if id_usuario != id_login_usuario:
+            print("Permissão negada. Apenas o dono pode alterar o arquivo.\n")
+        else:
+            # Chama a procedure
+            cursor.callproc('chavear_prioridade', (id_arquivo,))
+            
+            print(f"Prioridade do arquivo {id_arquivo} foi alternada com sucesso.\n")
+            conexao.commit()
+
     except mysql.connector.Error as err:
         if "Arquivo não encontrado" in str(err):
             print(f"Arquivo {id_arquivo} não encontrado.\n")
