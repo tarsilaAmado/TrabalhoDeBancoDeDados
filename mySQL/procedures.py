@@ -21,7 +21,7 @@ def conta_usuarios(conexao, id_arquivo):
         cursor = conexao.cursor()
         args = (id_arquivo, 0)  # 0 é um placeholder para o parâmetro OUT
         
-        cursor.callproc('conta_usuarios_por_arquivo', args)
+        cursor.callproc('conta_usuarios', args)
         
         for result in cursor.stored_results():
             total_usuarios = result.fetchall()[0][0]
