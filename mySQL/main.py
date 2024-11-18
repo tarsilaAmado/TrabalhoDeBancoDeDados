@@ -39,9 +39,9 @@ def main():
         login = input(("Login: "))
         senha = input(("Senha: "))
         
-        con = criar_conexao("localhost", login, senha, "webdriver")
+        con = criar_conexao("localhost", "root", "", "webdriver")
         if con is None:
-            print("Falha na conexão com o banco de dados.\n")
+            print("Falha na conexão com o banco de dados.")
             return
         
         # checa se o login existe
@@ -105,7 +105,7 @@ def main():
     
         elif op == 3: # cria arquivo
             role = role_check(con, login)
-            if login == "root" or any('papelADM' in i[0] for i in role):
+            if login == "root" or any('papelADM' in i[0] for i in role) or any('papelUsuario' in i[0] for i in role):
                 nome = input("Nome do arquivo: ")
                 tipo = input("Tipo (.exe não pode): ")
                 permissao_acesso = input("Permissão de acesso (publi/priv): ")

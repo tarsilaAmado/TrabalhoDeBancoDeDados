@@ -26,7 +26,7 @@ def conta_usuarios(conexao, id_arquivo):
         query = """
         SELECT COUNT(DISTINCT id_compartilhado) AS total_usuarios
         FROM compartilhamento
-        WHERE id_arquivo = %s
+        WHERE id = %s
         """
         cursor.execute(query, (id_arquivo,))
         resultado = cursor.fetchone()
@@ -92,7 +92,7 @@ def remover_acessos(conexao, id_arquivo):
             # Remover todos os acessos, exceto do proprietário
             query_remover = """
             DELETE FROM compartilhamento
-            WHERE id_arquivo = %s AND id_compartilhado != %s
+            WHERE id = %s AND id_compartilhado != %s
             """
             cursor.execute(query_remover, (id_arquivo, id_proprietario))
             conexao.commit()

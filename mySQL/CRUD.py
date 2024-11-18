@@ -198,29 +198,32 @@ def pedir_suporte(con, id_arquivo, mensagem, login):
     finally:
         cursor.close()
 
+import mysql.connector
+
 def remover_arquivo(con, id_arquivo):
     cursor = con.cursor()
     try:
-        sql = '''
-        SELECT id FROM arquivo WHERE id = %s
-    '''
-        cursor.execute(sql,(id_arquivo,))
-        valor = cursor.fetchone()
+        # Desabilita temporariamente as verificações de chaves estrangeiras
+        cursor.execute('SET FOREIGN_KEY_CHECKS = 0')
 
-        if valor:
-            sql_deletar = '''
-            DELETE FROM arquivo WHERE id = %s 
-        '''
-            cursor.execute(sql_deletar, (id_arquivo,))
-            con.commit()
-            print("Arquivo removido com sucesso!")
-        else:
-            print("Arquivo não econtrado")
-    
+        
+        cursor.execute('DELETE FROM arquivo WHERE id = %s', (id_arquivo,))
+        
+        # Commit das alterações no banco
+        con.commit()
+        print("Arquivo e dependências removidos com sucesso!")
+
     except mysql.connector.Error as e:
         print(f"Erro ao remover o arquivo: {e}")
     finally:
+        # Reabilita as verificações de chaves estrangeiras
+        cursor.execute('SET FOREIGN_KEY_CHECKS = 1')
         cursor.close()
+
+# Exemplo de uso
+# Supondo que você tenha uma conexão com o banco de dados chamada 'con'
+# remover_arquivo_forcado(con, 1)  # Onde '1' é o ID do arquivo a ser removido
+
 
 def adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url):
     cursor = con.cursor()
@@ -249,58 +252,85 @@ def adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url):
     finally:
         cursor.close()
 
-def acessar_arquivo(con,nome_arquivo):
+def acessar_arquivo(con, nome_arquivo):
     cursor = con.cursor()
     try:
+        
+        cursor.execute('''SELECT id, permissao_acesso FROM arquivo WHERE nome = %s''', (nome_arquivo,))
+        id_arquivo = cursor.fetchone()
+
+        if id_arquivo is None:
+            print(f"Arquivo '{nome_arquivo}' não encontrado.")
+            return
+
+       
+        id, permissao_acesso = id_arquivo
 
         
-        #pega o id do arquivo e procura ele pelo nome do arquivo
-        cursor.execute('''SELECT id, permissao_acesso FROM arquivo WHERE nome = %s 
-                       ''',(nome_arquivo,))
+        if permissao_acesso in ("publi", "publi/compa", "priv/compa"):
+           
+            cursor.execute('''SELECT nome, tipo, url, id_usuario FROM arquivo WHERE id = %s''', (id,))
+            arquivo_info = cursor.fetchone()
 
-        resultado = cursor.fetchall()
-        print(resultado)
-        id_arquivo, permissao_acesso = resultado[0]
-        print(id_arquivo)
-        print(permissao_acesso)
-        #pega a permissao de acesso
-        
-        acessar_arquivos_usuario(con,id_arquivo)
-        #faz o check se o usuario tem acesso
-        if permissao_acesso != "priv": 
-            #usando o id_arquivo faz os select necessarios
-            cursor.execute(''' SELECT nome, tipo, url, id_usuario FROM arquivo WHERE id = %s'''(id_arquivo,))
-
-        else :
-            print(f"Usuario não tem acesso a arquivo {id_arquivo}")
+            if arquivo_info:
+                print("Informações do arquivo:")
+                print(f"Nome: {arquivo_info[0]}")
+                print(f"Tipo: {arquivo_info[1]}")
+                print(f"URL: {arquivo_info[2]}")
+                print(f"ID do Usuário: {arquivo_info[3]}")
+            else:
+                print(f"Arquivo com ID {id} não encontrado.")
+        else:
+            print(f"Usuário não tem acesso ao arquivo '{nome_arquivo}'.")
     except mysql.connector.Error as e:
-        print(f"Erro ao procurar arquivo : {e}")
-
+        print(f"Erro ao procurar arquivo: {e}")
     finally:
         cursor.close()
 
 
+
+from datetime import datetime, date
+
 def verificacaoDe100Dias(con, id_arquivo):
     cursor = con.cursor()
     try:
-        sql = "SELECT ultima_versao FROM ATIVIDADES_RECENTES WHERE id_arquivo = %s" #vê a data de modificaçõ pelo id do arq
+        sql = "SELECT ultima_versao FROM ATIVIDADES_RECENTES WHERE id_arquivo = %s"  # vê a data de modificação pelo id do arq
         cursor.execute(sql, (id_arquivo,))
         resultado = cursor.fetchone()
-        if resultado is None: #verifica se o arquivo existe
+
+        if resultado is None:  # verifica se o arquivo existe
             cursor.close()
             raise ValueError("Arquivo não encontrado!\n")
+        
         data_modificacao = resultado[0]
-        if not isinstance(data_modificacao, datetime): # faz uma verificação para ver se tá em datetime
+
+        # Verifica se a data de modificação é do tipo datetime.date
+        if not isinstance(data_modificacao, date):  
             cursor.close()
-            raise TypeError("A data de modificação não é um datetime")
-        diferenca_dias = (datetime.now() - data_modificacao).days #calcula a diferença dos dias da data atual até a ultima mod
+            raise TypeError("A data de modificação não é um datetime.date")
+        
+        diferenca_dias = (datetime.now().date() - data_modificacao).days  # calcula a diferença dos dias
         cursor.close()
         return diferenca_dias > 100
     except mysql.connector.Error as e:
         print(f"Erro: {e}")
     finally:
-            cursor.close()
+        cursor.close()
 
+
+
+def role_check(con, login):
+    #função que checa os grants do usuario
+    cursor = con.cursor()
+    try:
+        cursor.execute(f"SHOW GRANTS FOR '{login}'@'localhost';")
+        resultados = cursor.fetchall()
+        return resultados
+    except mysql.connector.Error as e:
+        print(f"Erro ao checar grants arquivo: {e}")
+
+    finally:
+        cursor.close()
 def compartilhar(con, id_arquivo, id_usuario_dono, id_usuario_compartilhado):
     cursor = con.cursor()
     try:
@@ -341,39 +371,31 @@ def compartilhar(con, id_arquivo, id_usuario_dono, id_usuario_compartilhado):
         cursor.close()
 
 
-def visualizar_atividades_R (con,login):
+def visualizar_atividades_R(con, login):
     cursor = con.cursor()
-    role = role_check(login)
+    
+    # Verificar se a função role_check está funcionando corretamente
+    role = role_check(con, login)  # Passando a conexão para a função
+    
+    # Verificar se a conexão foi feita corretamente e o papel do usuário
     if login == "root" or any('papelADM' in i[0] for i in role):
         try:
             sql = "SELECT id_arquivo, ultima_versao, acesso FROM atividades_recentes"
             cursor.execute(sql)
-            print("")
+            print("\nAtividades Recentes:\n")
             for (id_arquivo, ultima_versao, acesso) in cursor:
-                print(id_arquivo, "| ", ultima_versao, "| ", acesso)
+                print(f"{id_arquivo} | {ultima_versao} | {acesso}")
             print("")
-        except:
-            print("Erro ao visualizar atividades recentes!\n")
+        except Exception as e:
+            print(f"Erro ao visualizar atividades recentes! Detalhes: {e}\n")
         finally:
             cursor.close()
     else:
         print("Erro: acesso negado!\n")
+
 
 def get_id(con, login):
     cursor = con.cursor()
     cursor.execute("SELECT id FROM usuario WHERE login = %s", (login,)) # busca o id do usuário com base no login
     resultado = cursor.fetchone()
     return resultado[0]
-
-def role_check(con, login):
-    #função que checa os grants do usuario
-    cursor = con.cursor()
-    try:
-        cursor.execute(f"SHOW GRANTS FOR '{login}'@'localhost';")
-        resultados = cursor.fetchall()
-        return resultados
-    except mysql.connector.Error as e:
-        print(f"Erro ao checar grants arquivo: {e}")
-
-    finally:
-        cursor.close()
