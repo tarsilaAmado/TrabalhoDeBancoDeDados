@@ -23,7 +23,7 @@ def menu():
     print("15 - Total de usuários com acesso a um arquivo")
     print("16 - Trocar acesso não prioritário para prioritário de um arquivo")
     print("17 - Remover acessos de arquivo")
-    print("18 -alterar url de um arquivo")
+    print("18 - Alterar um arquivo")
     print("0 - Sair")
     
 def main():
@@ -174,14 +174,14 @@ def main():
         elif op == 11: # visualizar atividades recentes
             role = role_check(con,login)
             if any('papelEmpresa' in i[0] for i in role):
-                print("Empresa com permissão negada para compartilhamento.\n")
+                print("Empresa com permissão negada para visualização.\n")
             else:
                 visualizar_atividades_R (con,login)
 
         elif op == 12: # visualizar histórico de versionamento
             role = role_check(con,login)
             if any('papelEmpresa' in i[0] for i in role):
-                print("Empresa com permissão negada para compartilhamento.\n")
+                print("Empresa com permissão negada para visualização.\n")
             else:
                 acessar_historico_operacoes(con)
             #terminar a logica ainda
@@ -199,7 +199,7 @@ def main():
                 acessar_arquivos_ADM(con, id)
             elif any('papelEmpresa' in i[0] for i in role):
                 #views empresa
-                id = get_id(con, login)
+                id = input(("Id da empresa para acessar arquivos: "))
                 acessar_arquivos_instituicao(con, id)
             elif any('papelUsuario' in i[0] for i in role):
                 #views usuario
@@ -208,15 +208,15 @@ def main():
 
         elif op == 14: # Atualizar atividades recentes com a data atual
             role = role_check(con,login)
-            if any('papelEmpresa' in i[0] for i in role):
-                print("Empresa com permissão negada para compartilhamento.\n")
+            if (any('papelEmpresa' in i[0] for i in role) or any('papelUsuario' in i[0] for i in role)):
+                print("Permissão negada para atualização.\n")
             else:
                 verificar_atividades(con)
 
         elif op == 15: # Total de usuários com acesso a um arquivo
             role = role_check(con,login)
             if any('papelEmpresa' in i[0] for i in role):
-                print("Empresa com permissão negada para compartilhamento.\n")
+                print("Empresa com permissão negada.\n")
             else:
                 id_arquivo = input(("Id do arquivo: "))
                 conta_usuarios(con, id_arquivo)
@@ -224,10 +224,10 @@ def main():
         elif op == 16: # Trocar acesso não prioritário para prioritário de um arquivo
             role = role_check(con,login)
             if any('papelEmpresa' in i[0] for i in role):
-                print("Empresa com permissão negada para compartilhamento.\n")
+                print("Empresa com permissão negada para esta ação.\n")
             else:
                 id_arquivo = input(("Id do arquivo: "))
-                chavear(con, id_arquivo)
+                chavear(con, id_arquivo,login)
 
         elif op == 17: # Remover acessos de arquivo
             id_arquivo = input(("Id do arquivo: "))
@@ -237,19 +237,19 @@ def main():
         elif op ==18: # alterar arquivo
             role = role_check(con,login)
             if any('papelEmpresa' in i[0] for i in role):
-                print("Empresa com permissão negada para compartilhamento.\n")
+                print("Empresa com permissão negada para alteração.\n")
             else:
                 escolha = input(("\n1 - Alterar tipo\n2 - Alterar URL\nEscolha: "))
-                if escolha == 1:
+                if escolha == "1":
                     id_arquivo=input(("Id arquivo: "))
                     novo_tipo = input(("Novo tipo (não pode ser .exe): "))
                     while novo_tipo == ".exe":
                         novo_tipo = input(("Não pode ser .exe. Novo tipo: "))
-                    alterar_tipo_arquivo(con,id_arquivo,novo_tipo)
-                elif escolha == 2:
+                    alterar_tipo_arquivo(con,id_arquivo,novo_tipo,login)
+                elif escolha == "2":
                     id_arquivo=input(("Id arquivo: "))
                     nova_url=input(("Qual a nova url: "))
-                    alterar_url_arquivo(con,id_arquivo,nova_url)
+                    alterar_url_arquivo(con,id_arquivo,nova_url,login)
 
     print("Saindo do programa...")
     fechar_conexao(con)
