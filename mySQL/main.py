@@ -178,13 +178,13 @@ def main():
             else:
                 visualizar_atividades_R (con,login)
 
-        elif op == 12: # visualizar histórico de versionamento
+        elif op == 12: # visualizar histórico de operacoes  #nos trocamos, mas faz a mesma coisa que o historico versionamento
             role = role_check(con,login)
             if any('papelEmpresa' in i[0] for i in role):
                 print("Empresa com permissão negada para visualização.\n")
             else:
                 acessar_historico_operacoes(con)
-            #terminar a logica ainda
+           
 
         elif op == 13:
             #veifica qual o role do usuario atual
