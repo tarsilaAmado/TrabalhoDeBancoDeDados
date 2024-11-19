@@ -493,3 +493,25 @@ def get_id(con, login):
     cursor.execute("SELECT id FROM usuario WHERE login = %s", (login,)) # busca o id do usuário com base no login
     resultado = cursor.fetchone()
     return resultado[0]
+
+
+def visualizar_historico_operacoes(con, login):
+    cursor = con.cursor()
+
+    role = role_check(con, login)  # Passando a conexão para a função
+    # Verificar se a conexão foi feita corretamente e o papel do usuário
+    if login == "root" or any('papelADM' in i[0] for i in role):
+        
+        try:
+            cursor.execute("SELECT * from historico_operacoes")
+            historico = cursor.fetchall()
+            for row in historico:
+                print(row)
+
+        except mysql.connector.Error as err:
+            print(f"Erro ao acessar histórico de operações: {err}")
+        
+        finally:
+            cursor.close()
+    else:
+        print("Permissão negada.\n")
