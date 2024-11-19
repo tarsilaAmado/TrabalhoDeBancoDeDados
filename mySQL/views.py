@@ -127,7 +127,7 @@ def acessar_arquivos_root(con, login):
         if(login == "root"):
             cursor.execute("SELECT * from arquivo")
             arquivos = cursor.fetchall()
-            for row in cursor:
+            for row in arquivos:
                 print(row)
         else :
             print("Acesso bloqueado!")
@@ -137,4 +137,3 @@ def acessar_arquivos_root(con, login):
     
     finally:
         cursor.close()
-    
