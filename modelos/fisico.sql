@@ -43,15 +43,7 @@ FOREIGN KEY(id_usuario) REFERENCES usuario(id)
 );
  
  
-CREATE TABLE IF NOT EXISTS historico_versionamento(
-id INT AUTO_INCREMENT PRIMARY KEY,
-id_usuario INT,
-data_v DATE,
-hora TIME,
-id_arquivo INT,
-FOREIGN KEY(id_usuario) REFERENCES usuario(id),
-FOREIGN KEY(id_arquivo) REFERENCES arquivo(id)
-);
+
  
 CREATE TABLE IF NOT EXISTS operacao(
 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -146,6 +138,8 @@ hora_operacao DATETIME DEFAULT CURRENT_TIMESTAMP,
 FOREIGN KEY (id_usuario) REFERENCES usuario(id),
 FOREIGN KEY (id_arquivo) REFERENCES arquivo(id)
 );
+
+
 -- # TRIGGERS
  
 DELIMITER //
@@ -239,75 +233,8 @@ GRANT SELECT, INSERT, UPDATE ON *.* TO papelUsuario;
 GRANT SELECT ON *.* TO papelEmpresa;
 GRANT SELECT, INSERT, UPDATE, DELETE ON *.* TO papelADM;
 GRANT CREATE USER ON *.* TO papelADM;
+ALTER TABLE atividades_recentes
+DROP FOREIGN KEY atividades_recentes_ibfk_1;
 
--- # PROCEDURES
+SHOW GRANTS FOR 'patri'@'localhost';
 
-DELIMITER //
-
-CREATE PROCEDURE verificar_atividades ()
-BEGIN 
-	UPDATE atividades_recentes SET ultima_versao = CURDATE();
-END;
-
-//
-
-CREATE PROCEDURE conta_usuarios(IN id_arquivo INT, OUT total_usuarios INT)
-BEGIN
-    SELECT COUNT(DISTINCT id_compartilhado) AS total_usuarios
-    FROM compartilhamento
-    WHERE id_arquivo = id_arquivo;
-END; 
-
-//
-
-DELIMITER //
-
-CREATE PROCEDURE chavear_prioridade(IN arquivo_id INT)
-BEGIN
-DECLARE prioridade_atual VARCHAR(20);
-
-SELECT acesso INTO prioridade_atual
-FROM atividades_recentes
-WHERE id_arquivo = id_arquivo;
-
--- Verifica se o arquivo foi encontrado
-IF prioridade_atual IS NOT NULL THEN
-	-- Define a nova prioridade com base na atual
-UPDATE atividades_recentes
-SET acesso = CASE 
-WHEN prioridade_atual = 'prioritário' THEN 'não prioritário'
-ELSE 'prioritário'
-END
-WHERE id_arquivo = arquivo_id;
-ELSE
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'Arquivo não encontrado.';
-END IF;
-END;
-
-//
-
-CREATE PROCEDURE remover_acessos(IN id_arquivo INT)
-BEGIN
-DECLARE id_proprietario INT;
-
--- Verifica o proprietário do arquivo
-SELECT id_usuario INTO id_proprietario
-FROM arquivo
-WHERE id = id_arquivo;
-
--- Verifica se o arquivo foi encontrado
-IF id_proprietario IS NOT NULL THEN
--- Remove acessos, exceto do proprietário
-DELETE FROM compartilhamento
-WHERE id_arquivo = arquivo_id AND id_compartilhado != id_proprietario;
-ELSE
--- Lança um erro se o arquivo não for encontrado
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'Arquivo não encontrado.';
-END IF;
-END;
-
-//
-
-DELIMITER ;
