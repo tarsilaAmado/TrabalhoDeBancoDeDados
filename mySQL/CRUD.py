@@ -1,7 +1,7 @@
 import mysql.connector
 from mysql.connector import Error
 from conexao import *
-from datetime import datetime
+from datetime import date, datetime
 from views import *
 from roles import atribuir_role
 
@@ -82,12 +82,12 @@ def insere_usuario(con, login, senha, email, data_ingresso, id_instituicao):
         cursor.close()
 
 
-def insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario): # insere um plano
+def insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario,login): # insere um plano
     cursor = con.cursor()
 
     role = role_check(con,login)
     if (any('papelEmpresa' in i[0] for i in role) or any('papelUsuario' in i[0] for i in role)):
-        print("Permissão negada para compartilhamento.\n")
+        print("Permissão negada para inserção.\n")
         return
 
     try:
@@ -106,12 +106,12 @@ def insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario): # insere u
 
 
 
-def fazerComentario(con, id_arquivo, conteudo, id_usuario):
+def fazerComentario(con, id_arquivo, conteudo, id_usuario,login):
     cursor = con.cursor(buffered=True)
 
     role = role_check(con,login)
     if any('papelEmpresa' in i[0] for i in role):
-        print("Empresa com permissão negada para compartilhamento.\n")
+        print("Empresa com permissão negada para fazer comentário.\n")
         return
 
     try:
