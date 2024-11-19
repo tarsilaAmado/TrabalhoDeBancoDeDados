@@ -124,7 +124,7 @@ def main():
                 id_arquivo = input(("Id do arquivo: "))
                 conteudo = input(("Conteúdo do comentário: "))
                 id_usuario = input(("Id do usuário que está comentando: "))
-                fazerComentario(con, id_arquivo, conteudo, id_usuario)
+                fazerComentario(con, id_arquivo, conteudo, id_usuario,login)
             else:
                 #se ele não for adm, nem root, nem usuário
                 print("Permissão negada para fazer comentário.\n")
@@ -135,7 +135,7 @@ def main():
             duracao = input(("Duração (HH:MM:SS): "))
             data_aquisicao = input(("Data de aquisição (AAAA-MM-DD): ")) 
             espaco_usuario = input(("Espaço do usuário: "))
-            insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario)
+            insere_plano(con, nome, duracao, data_aquisicao, espaco_usuario,login)
 
         elif op == 6: # compartilhar arquivo
             id_arquivo = input("Id do arquivo: ")
@@ -196,7 +196,7 @@ def main():
             elif any('papelADM' in i[0] for i in role):
                 #views adm
                 id = get_id(con, login)
-                acessar_arquivos_ADM(con, id)
+                acessar_arquivo(con, id)
             elif any('papelEmpresa' in i[0] for i in role):
                 #views empresa
                 id = input(("Id da empresa para acessar arquivos: "))
