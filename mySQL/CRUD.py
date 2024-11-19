@@ -285,7 +285,7 @@ def adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url):
 def acessar_arquivo(con, nome_arquivo):
     cursor = con.cursor()
     try:
-        
+        # Consulta inicial para verificar a existência e permissões do arquivo
         cursor.execute('''SELECT id, permissao_acesso FROM arquivo WHERE nome = %s''', (nome_arquivo,))
         id_arquivo = cursor.fetchone()
 
@@ -293,12 +293,11 @@ def acessar_arquivo(con, nome_arquivo):
             print(f"Arquivo '{nome_arquivo}' não encontrado.")
             return
 
-       
         id, permissao_acesso = id_arquivo
 
-        
+        # Verifica permissões de acesso
         if permissao_acesso in ("publi", "publi/compa", "priv/compa"):
-           
+            # Consulta para obter informações do arquivo
             cursor.execute('''SELECT nome, tipo, url, id_usuario FROM arquivo WHERE id = %s''', (id,))
             arquivo_info = cursor.fetchone()
 
@@ -312,6 +311,11 @@ def acessar_arquivo(con, nome_arquivo):
                 print(f"Arquivo com ID {id} não encontrado.")
         else:
             print(f"Usuário não tem acesso ao arquivo '{nome_arquivo}'.")
+
+        # Descarta quaisquer resultados adicionais que possam existir
+        while cursor.nextset():
+            pass
+
     except mysql.connector.Error as e:
         print(f"Erro ao procurar arquivo: {e}")
     finally:
@@ -499,7 +503,7 @@ def visualizar_historico_operacoes(con, login):
     cursor = con.cursor()
 
     role = role_check(con, login)  # Passando a conexão para a função
-    # Verificar se a conexão foi feita corretamente e o papel do usuário
+    # Verificar se a conexão foi ffeita corretamente e o papel do usuário
     if login == "root" or any('papelADM' in i[0] for i in role):
         
         try:
