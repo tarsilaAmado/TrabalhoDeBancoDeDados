@@ -214,53 +214,61 @@ def pedir_suporte(con, id_arquivo, mensagem, login):
         cursor.close()
 
 
-def remover_arquivo(con, id_arquivo,login):
+def remover_arquivo(con, id_arquivo, login):
     cursor = con.cursor()
 
-    role = role_check(con,login)
+    # Verificação do papel do usuário
+    role = role_check(con, login)
     if any('papelEmpresa' in i[0] for i in role):
         print("Empresa com permissão negada para compartilhamento.\n")
         return
 
     try:
-
-        cursor.execute(''' SELECT id_usuario FROM arquivo WHERE id = %s ''',(id_arquivo,))
+        # Busca o dono do arquivo
+        cursor.execute('SELECT id_usuario FROM arquivo WHERE id = %s', (id_arquivo,))
         id_usuario = cursor.fetchone()
-        cursor.execute('''SELECT id FROM usuario WHERE login = %s''',(login,))
+
+        # Busca o ID do usuário pelo login
+        cursor.execute('SELECT id FROM usuario WHERE login = %s', (login,))
         id_login_usuario = cursor.fetchone()
 
+        # Desempacota os valores
+        id_usuario = id_usuario[0] if id_usuario else None
+        id_login_usuario = id_login_usuario[0] if id_login_usuario else None
+
+        # Verifica se o usuário tem permissão
         if id_usuario != id_login_usuario:
             print("Permissão negada. Apenas o dono pode remover o arquivo.\n")
-        else:
-            # Desabilita temporariamente as verificações de chaves estrangeiras
-            cursor.execute('SET FOREIGN_KEY_CHECKS = 0')
+            return
 
-            
-            cursor.execute('DELETE FROM arquivo WHERE id = %s', (id_arquivo,))
-            cursor.execute('DELETE FROM comentario WHERE %s', (id_arquivo,))
-            
-            # Commit das alterações no banco
-            con.commit()
-            print("Arquivo e dependências removidos com sucesso!")
+        # Desabilita verificações de chaves estrangeiras
+        cursor.execute('SET FOREIGN_KEY_CHECKS = 0')
 
-            operacao = "remove"
-            sql = '''INSERT INTO historico_operacoes (id_usuario, operacao, data_operacao, hora_operacao)
-                    VALUES (%s, %s, %s, %s)
-            '''
-            valores = (id_usuario, operacao, datetime.now().date(), datetime.now().time())
-            cursor.execute(sql, valores)
-            con.commit()
+        # Remove o arquivo e seus comentários
+        cursor.execute('DELETE FROM arquivo WHERE id = %s', (id_arquivo,))
+        cursor.execute('DELETE FROM comentario WHERE id_arquivo = %s', (id_arquivo,))  # Corrigido o SQL
+
+        # Commit das alterações
+        con.commit()
+        print("Arquivo e dependências removidos com sucesso!")
+
+        # Registra no histórico
+        operacao = "remove"
+        sql = '''
+            INSERT INTO historico_operacoes (id_usuario, id_arquivo, operacao)
+            VALUES (%s, %s, %s)
+        '''
+        valores = (id_usuario, id_arquivo, operacao)
+        cursor.execute(sql, valores)
+        con.commit()
 
     except mysql.connector.Error as e:
         print(f"Erro ao remover o arquivo: {e}")
+
     finally:
-        # Reabilita as verificações de chaves estrangeiras
+        # Reabilita verificações de chaves estrangeiras
         cursor.execute('SET FOREIGN_KEY_CHECKS = 1')
         cursor.close()
-
-# Exemplo de uso
-# Supondo que você tenha uma conexão com o banco de dados chamada 'con'
-# remover_arquivo_forcado(con, 1)  # Onde '1' é o ID do arquivo a ser removido
 
 
 def adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url):
@@ -276,16 +284,20 @@ def adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url):
                 INSERT INTO arquivo (nome, tipo, permissao_acesso, id_usuario, URL)
                 VALUES (%s, %s, %s, %s, %s)
             """
+
             valores = (nome, tipo, permissao_acesso, id_usuario, url)
             cursor.execute(sql, valores)
             con.commit()
             print("Arquivo adicionado com sucesso!\n")
+            
+            cursor.execute("SELECT id FROM arquivo WHERE nome = %s",(nome,))
+            id_arquivo = cursor.fetchone()[0]
 
             operacao = "inserção"
-            sql = '''INSERT INTO historico_operacoes (id_usuario, operacao, data_operacao, hora_operacao)
-                    VALUES (%s, %s, %s, %s)
+            sql = '''INSERT INTO historico_operacoes (id_usuario, id_arquivo, operacao)
+                    VALUES (%s, %s, %s)
             '''
-            valores = (id_usuario, operacao, datetime.now().date(), datetime.now().time())
+            valores = (id_usuario, id_arquivo, operacao)
             cursor.execute(sql, valores)
             con.commit()
             
@@ -449,53 +461,69 @@ def visualizar_atividades_R(con, login):
         print("Erro: acesso negado!\n")
 
 
-def alterar_url_arquivo(con, id_arquivo, nova_url,login):
+def alterar_url_arquivo(con, id_arquivo, nova_url, login):
     cursor = con.cursor()
     try:
-
-        cursor.execute(''' SELECT id_usuario FROM arquivo WHERE id = %s ''',(id_arquivo,))
+        # Obtém o ID do usuário dono do arquivo
+        cursor.execute('SELECT id_usuario FROM arquivo WHERE id = %s', (id_arquivo,))
         id_usuario = cursor.fetchone()
-        cursor.execute('''SELECT id FROM usuario WHERE login = %s''',(login,))
+
+        # Obtém o ID do usuário a partir do login
+        cursor.execute('SELECT id FROM usuario WHERE login = %s', (login,))
         id_login_usuario = cursor.fetchone()
 
+        # Desembrulha os valores retornados
+        id_usuario = id_usuario[0] if id_usuario else None
+        id_login_usuario = id_login_usuario[0] if id_login_usuario else None
+
+        # Verifica se o usuário tem permissão
         if id_usuario != id_login_usuario:
             print("Permissão negada. Apenas o dono pode alterar o arquivo.\n")
+            return
+
+        # Verifica se o arquivo existe
+        cursor.execute('SELECT id FROM arquivo WHERE id = %s', (id_arquivo,))
+        valor = cursor.fetchone()
+
+        if valor:
+            # Atualiza a URL do arquivo
+            cursor.execute('UPDATE arquivo SET URL = %s WHERE id = %s', (nova_url, id_arquivo))
+            con.commit()
+            print("URL do arquivo atualizada com sucesso!")
+
+            # Insere a operação no histórico
+            operacao = "update"
+            sql = '''INSERT INTO historico_operacoes (id_usuario, id_arquivo, operacao)
+                     VALUES (%s, %s, %s)
+            '''
+            valores = (id_usuario, id_arquivo, operacao)
+            cursor.execute(sql, valores)
+            con.commit()
         else:
-            # Verifica se o arquivo existe
-            cursor.execute('SELECT id FROM arquivo WHERE id = %s', (id_arquivo,))
-            valor = cursor.fetchone()
+            print("Arquivo não encontrado.\n")
 
-            if valor:
-                # Atualiza a URL do arquivo
-                cursor.execute('UPDATE arquivo SET URL = %s WHERE id = %s', (nova_url, id_arquivo))
-                con.commit()
-                print("URL do arquivo atualizada com sucesso!")
-
-                operacao = "update"
-                sql = '''INSERT INTO historico_operacoes (id_usuario, operacao, data_operacao, hora_operacao)
-                        VALUES (%s, %s, %s, %s)
-                '''
-                valores = (id_usuario, operacao, datetime.now().date(), datetime.now().time())
-                cursor.execute(sql, valores)
-                con.commit()
-
-            else:
-                print("Arquivo não encontrado")
-    
     except mysql.connector.Error as e:
-        print(f"Erro ao alterar a URL do arquivo: {e}")
+        print(f"Erro ao alterar a URL do arquivo: {e}\n")
+
     finally:
         cursor.close()
 
+    
 
-def alterar_tipo_arquivo(con, id_arquivo, novo_tipo,login):
+def alterar_tipo_arquivo(con, id_arquivo, novo_tipo, login):
     cursor = con.cursor()
     try:
-
-        cursor.execute(''' SELECT id_usuario FROM arquivo WHERE id = %s ''',(id_arquivo,))
+        # Obtém o ID do usuário dono do arquivo
+        cursor.execute('SELECT id_usuario FROM arquivo WHERE id = %s', (id_arquivo,))
         id_usuario = cursor.fetchone()
-        cursor.execute('''SELECT id FROM usuario WHERE login = %s''',(login,))
+        
+        # Obtém o ID do usuário com base no login
+        cursor.execute('SELECT id FROM usuario WHERE login = %s', (login,))
         id_login_usuario = cursor.fetchone()
+
+        # Desembrulha os valores retornados
+        id_usuario = id_usuario[0] if id_usuario else None
+        id_login_usuario = id_login_usuario[0] if id_login_usuario else None
 
         if id_usuario != id_login_usuario:
             print("Permissão negada. Apenas o dono pode alterar o arquivo.\n")
@@ -505,21 +533,21 @@ def alterar_tipo_arquivo(con, id_arquivo, novo_tipo,login):
             valor = cursor.fetchone()
 
             if valor:
-                # Atualiza a URL do arquivo
+                # Atualiza o tipo do arquivo
                 cursor.execute('UPDATE arquivo SET tipo = %s WHERE id = %s', (novo_tipo, id_arquivo))
                 con.commit()
-                print("Tipo do arquivo atualizada com sucesso!")
+                print("Tipo do arquivo atualizado com sucesso!")
 
+                # Insere no histórico de operações
                 operacao = "update"
-                sql = '''INSERT INTO historico_operacoes (id_usuario, operacao, data_operacao, hora_operacao)
-                        VALUES (%s, %s, %s, %s)
+                sql = '''INSERT INTO historico_operacoes (id_usuario, id_arquivo, operacao)
+                        VALUES (%s, %s, %s)
                 '''
-                valores = (id_usuario, operacao, datetime.now().date(), datetime.now().time())
+                valores = (id_usuario, id_arquivo, operacao)
                 cursor.execute(sql, valores)
                 con.commit()
             else:
-                print("Arquivo não encontrado")
-    
+                print("Arquivo não encontrado.")
     except mysql.connector.Error as e:
         print(f"Erro ao alterar o tipo do arquivo: {e}")
     finally:
