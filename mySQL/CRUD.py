@@ -243,6 +243,14 @@ def remover_arquivo(con, id_arquivo,login):
             con.commit()
             print("Arquivo e dependências removidos com sucesso!")
 
+            operacao = "remove"
+            sql = '''INSERT INTO historico_operacoes (id_usuario, operacao, data_operacao, hora_operacao)
+                    VALUES (%s, %s, %s, %s)
+            '''
+            valores = (id_usuario, operacao, datetime.now().date(), datetime.now().time())
+            cursor.execute(sql, valores)
+            con.commit()
+
     except mysql.connector.Error as e:
         print(f"Erro ao remover o arquivo: {e}")
     finally:
@@ -272,6 +280,14 @@ def adicionar_arquivo(con, nome, tipo, permissao_acesso, id_usuario, url):
             cursor.execute(sql, valores)
             con.commit()
             print("Arquivo adicionado com sucesso!\n")
+
+            operacao = "inserção"
+            sql = '''INSERT INTO historico_operacoes (id_usuario, operacao, data_operacao, hora_operacao)
+                    VALUES (%s, %s, %s, %s)
+            '''
+            valores = (id_usuario, operacao, datetime.now().date(), datetime.now().time())
+            cursor.execute(sql, valores)
+            con.commit()
             
         else:
             print("Usuário não encontrado. Verifique o ID do usuário.\n")
@@ -454,6 +470,15 @@ def alterar_url_arquivo(con, id_arquivo, nova_url,login):
                 cursor.execute('UPDATE arquivo SET URL = %s WHERE id = %s', (nova_url, id_arquivo))
                 con.commit()
                 print("URL do arquivo atualizada com sucesso!")
+
+                operacao = "update"
+                sql = '''INSERT INTO historico_operacoes (id_usuario, operacao, data_operacao, hora_operacao)
+                        VALUES (%s, %s, %s, %s)
+                '''
+                valores = (id_usuario, operacao, datetime.now().date(), datetime.now().time())
+                cursor.execute(sql, valores)
+                con.commit()
+
             else:
                 print("Arquivo não encontrado")
     
@@ -484,6 +509,14 @@ def alterar_tipo_arquivo(con, id_arquivo, novo_tipo,login):
                 cursor.execute('UPDATE arquivo SET tipo = %s WHERE id = %s', (novo_tipo, id_arquivo))
                 con.commit()
                 print("Tipo do arquivo atualizada com sucesso!")
+
+                operacao = "update"
+                sql = '''INSERT INTO historico_operacoes (id_usuario, operacao, data_operacao, hora_operacao)
+                        VALUES (%s, %s, %s, %s)
+                '''
+                valores = (id_usuario, operacao, datetime.now().date(), datetime.now().time())
+                cursor.execute(sql, valores)
+                con.commit()
             else:
                 print("Arquivo não encontrado")
     
